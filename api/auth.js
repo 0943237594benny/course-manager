@@ -16,7 +16,7 @@ export default async function handler(req, res) {
   const clientId = process.env.GOOGLE_CLIENT_ID;
   const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
   const baseUrl = process.env.NEXTAUTH_URL || "https://course-manager-xi.vercel.app";
-  const redirectUri = `${baseUrl}/api/auth?action=callback`;
+  const redirectUri = `${baseUrl}/api/callback`;
 
   // 產生 Google 登入網址
   if (action === "login") {
