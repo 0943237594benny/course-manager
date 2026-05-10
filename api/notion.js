@@ -1,6 +1,5 @@
-
 const NOTION_API = "https://api.notion.com/v1";
-const DB_ID = "43f21d6b09114fdda8e013c7c9e07ec9";
+const DB_ID = "ee4077f18c004713822b9970be352cea";
 
 export default async function handler(req, res) {
   res.setHeader("Access-Control-Allow-Origin", "*");
