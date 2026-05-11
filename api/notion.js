@@ -92,7 +92,6 @@ function mapPage(p) {
     startTime: props["開始時間"]?.rich_text?.[0]?.plain_text || "",
     endTime: props["結束時間"]?.rich_text?.[0]?.plain_text || "",
     location: props["地點"]?.rich_text?.[0]?.plain_text || "",
-    hours: props["授課時數"]?.number || 0,
     note: props["備注"]?.rich_text?.[0]?.plain_text || "",
   };
 }
