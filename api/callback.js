@@ -43,6 +43,7 @@ export default async function handler(req, res) {
       email: user.email,
       name: user.name,
       picture: user.picture,
+      gmailToken: tokenData.access_token,
       exp: Date.now() + 7 * 24 * 60 * 60 * 1000,
     })).toString("base64");
 
