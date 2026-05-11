@@ -5,366 +5,349 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="theme-color" content="#1a1a1a">
+<meta name="theme-color" content="#0f0f10">
 <title>課程管理</title>
 <link rel="manifest" href="manifest.json">
-<link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0f0f10;--bg2:#1a1a1c;--bg3:#252528;
+  --border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.12);
+  --text:#f0f0f0;--text2:#888;--text3:#444;
+  --red:#ff4444;--orange:#ff8c00;--blue:#2d8cff;--green:#2dcc70;--amber:#ffc107;--purple:#9b59b6;
+  --red-bg:rgba(255,68,68,0.12);--orange-bg:rgba(255,140,0,0.12);
+  --blue-bg:rgba(45,140,255,0.12);--green-bg:rgba(45,204,112,0.12);
+  --amber-bg:rgba(255,193,7,0.12);--purple-bg:rgba(155,89,182,0.12);
+  --r:12px;--r-sm:8px;
+}
+body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:80px;-webkit-font-smoothing:antialiased}
 
-  :root {
-    --bg: #111112;
-    --bg2: #1c1c1e;
-    --bg3: #2c2c2e;
-    --border: rgba(255,255,255,0.08);
-    --text: #f5f5f5;
-    --text2: #8e8e93;
-    --text3: #48484a;
-    --red: #ff453a;
-    --blue: #0a84ff;
-    --green: #32d74b;
-    --amber: #ffd60a;
-    --red-bg: rgba(255,69,58,0.12);
-    --blue-bg: rgba(10,132,255,0.12);
-    --green-bg: rgba(50,215,75,0.12);
-    --amber-bg: rgba(255,214,10,0.12);
-    --radius: 14px;
-    --radius-sm: 10px;
-  }
+/* TOP BAR */
+.topbar{position:sticky;top:0;z-index:50;background:rgba(15,15,16,0.9);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:14px 18px 12px;display:flex;align-items:center;justify-content:space-between}
+.topbar-title{font-size:17px;font-weight:600;letter-spacing:-.3px}
+.topbar-sub{font-size:11px;color:var(--text2);margin-top:2px;font-family:'DM Mono',monospace}
+.add-btn{width:32px;height:32px;border-radius:50%;background:var(--text);color:var(--bg);border:none;font-size:18px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:opacity .15s;flex-shrink:0}
+.add-btn:active{opacity:.7}
 
-  body {
-    font-family: 'Noto Sans TC', sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    min-height: 100vh;
-    padding-bottom: 90px;
-    -webkit-font-smoothing: antialiased;
-  }
+/* TABS */
+.tabs{display:flex;border-bottom:1px solid var(--border);padding:0 18px;background:var(--bg);position:sticky;top:65px;z-index:40}
+.tab{flex:1;padding:11px 0;font-size:12px;font-weight:400;color:var(--text2);cursor:pointer;text-align:center;border-bottom:2px solid transparent;transition:color .15s,border-color .15s}
+.tab.active{color:var(--text);font-weight:500;border-bottom-color:var(--text)}
 
-  /* TOP BAR */
-  .topbar {
-    position: sticky; top: 0; z-index: 50;
-    background: rgba(17,17,18,0.85);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border-bottom: 1px solid var(--border);
-    padding: 14px 20px 12px;
-    display: flex; align-items: center; justify-content: space-between;
-  }
-  .topbar-left h1 { font-size: 18px; font-weight: 700; letter-spacing: -0.3px; }
-  .topbar-left p { font-size: 12px; color: var(--text2); margin-top: 1px; font-family: 'DM Mono', monospace; }
-  .add-btn {
-    width: 34px; height: 34px; border-radius: 50%;
-    background: var(--text); color: var(--bg);
-    border: none; font-size: 20px; line-height: 1;
-    display: flex; align-items: center; justify-content: center;
-    cursor: pointer; transition: opacity .15s;
-  }
-  .add-btn:active { opacity: .7; }
+.section{display:none;padding:14px 16px}
+.section.active{display:block}
 
-  /* TABS */
-  .tabs {
-    display: flex; gap: 0;
-    border-bottom: 1px solid var(--border);
-    padding: 0 20px;
-    background: var(--bg);
-    position: sticky; top: 65px; z-index: 40;
-  }
-  .tab {
-    flex: 1; padding: 12px 0; font-size: 13px; font-weight: 400;
-    color: var(--text2); cursor: pointer; text-align: center;
-    border-bottom: 2px solid transparent;
-    transition: color .15s, border-color .15s;
-  }
-  .tab.active { color: var(--text); font-weight: 500; border-bottom-color: var(--text); }
+/* USER BAR */
+.user-bar{background:rgba(26,26,28,0.9);border-bottom:1px solid var(--border);padding:8px 18px;display:flex;align-items:center;justify-content:space-between}
+.user-info{display:flex;align-items:center;gap:8px}
+.user-avatar{width:26px;height:26px;border-radius:50%}
+.user-email{font-size:12px;color:var(--text2);font-family:'DM Mono',monospace}
+.logout-btn{font-size:12px;color:var(--red);text-decoration:none}
 
-  /* SECTIONS */
-  .section { display: none; padding: 16px 20px; }
-  .section.active { display: block; }
+/* CALENDAR */
+.cal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.cal-month{font-size:15px;font-weight:600;font-family:'DM Mono',monospace}
+.cal-nav{width:32px;height:32px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r-sm);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text2);font-size:16px;transition:border-color .15s}
+.cal-nav:hover{border-color:var(--border2)}
 
-  /* LOADING */
-  .loading {
-    text-align: center; padding: 48px 0;
-    color: var(--text2); font-size: 14px;
-  }
-  .spinner {
-    width: 24px; height: 24px; border: 2px solid var(--bg3);
-    border-top-color: var(--text2); border-radius: 50%;
-    animation: spin .7s linear infinite; margin: 0 auto 12px;
-  }
-  @keyframes spin { to { transform: rotate(360deg); } }
+/* FILTER */
+.filters{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap}
+.filter-btn{display:flex;align-items:center;gap:5px;padding:5px 10px;border-radius:20px;border:1px solid var(--border);font-size:11px;cursor:pointer;color:var(--text2);background:var(--bg2);transition:all .15s;font-family:'Noto Sans TC',sans-serif}
+.filter-btn.active{border-color:transparent;color:#fff}
+.filter-btn.f-課程.active{background:var(--blue-bg);color:var(--blue);border-color:var(--blue)}
+.filter-btn.f-生活.active{background:var(--green-bg);color:var(--green);border-color:var(--green)}
+.filter-btn.f-專案.active{background:var(--purple-bg);color:var(--purple);border-color:var(--purple)}
+.filter-btn.f-其他.active{background:var(--amber-bg);color:var(--amber);border-color:var(--amber)}
+.filter-dot{width:7px;height:7px;border-radius:50%}
 
-  /* MONTH LABEL */
-  .month-label {
-    font-size: 11px; font-weight: 500; color: var(--text3);
-    letter-spacing: .08em; text-transform: uppercase;
-    font-family: 'DM Mono', monospace;
-    margin: 20px 0 8px; padding-left: 2px;
-  }
-  .month-label:first-child { margin-top: 4px; }
+/* GRID */
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:1px;background:var(--border);border-radius:var(--r);overflow:hidden;margin-bottom:14px}
+.cal-dow{background:var(--bg2);padding:7px 0;text-align:center;font-size:10px;color:var(--text3);font-family:'DM Mono',monospace;letter-spacing:.05em}
+.cal-cell{background:var(--bg2);min-height:64px;padding:4px 3px;cursor:pointer;transition:background .12s;position:relative}
+.cal-cell:hover{background:var(--bg3)}
+.cal-cell.today .cal-day{background:var(--text);color:var(--bg);border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-weight:600}
+.cal-cell.other-month .cal-day{color:var(--text3)}
+.cal-day{font-size:12px;color:var(--text2);margin-bottom:3px;width:22px;height:22px;display:flex;align-items:center;justify-content:center}
+.cal-events{display:flex;flex-direction:column;gap:2px}
+.cal-event-bar{font-size:9px;border-radius:3px;padding:1px 4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:500;line-height:1.4}
+.cal-event-bar.span-start{border-radius:3px 0 0 3px}
+.cal-event-bar.span-mid{border-radius:0;margin:0 -1px}
+.cal-event-bar.span-end{border-radius:0 3px 3px 0}
+.cal-dot{width:5px;height:5px;border-radius:50%;display:inline-block;margin:1px}
 
-  /* COURSE CARD */
-  .card {
-    background: var(--bg2);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 14px 16px;
-    margin-bottom: 10px;
-    cursor: pointer;
-    transition: border-color .15s, transform .1s;
-    position: relative; overflow: hidden;
-  }
-  .card:active { transform: scale(.98); }
-  .card::before {
-    content: ''; position: absolute; left: 0; top: 0; bottom: 0;
-    width: 3px; border-radius: 3px 0 0 3px;
-  }
-  .card.tag-授課-教官::before { background: var(--red); }
-  .card.tag-授課-助教::before { background: #ff8c00; }
-  .card.tag-訓練::before { background: var(--blue); }
-  .card.tag-其他::before { background: var(--amber); }
-  .card.expired { opacity: 0.4; filter: grayscale(40%); }
-  .badge-授課-教官 { background: var(--red-bg); color: var(--red); }
-  .badge-授課-助教 { background: rgba(255,140,0,0.12); color: #ff8c00; }
-  .badge-訓練 { background: var(--blue-bg); color: var(--blue); }
-  .badge-其他 { background: var(--amber-bg); color: var(--amber); }
+/* TAG COLORS */
+.tag-授課-教官{background:var(--red-bg);color:var(--red)}
+.tag-授課-助教{background:var(--orange-bg);color:var(--orange)}
+.tag-訓練{background:var(--blue-bg);color:var(--blue)}
+.tag-其他{background:var(--amber-bg);color:var(--amber)}
+.cat-課程{background:var(--blue-bg);color:var(--blue)}
+.cat-生活{background:var(--green-bg);color:var(--green)}
+.cat-專案{background:var(--purple-bg);color:var(--purple)}
+.cat-其他{background:var(--amber-bg);color:var(--amber)}
 
-  .card-title { font-size: 14px; font-weight: 500; margin-bottom: 6px; padding-left: 2px; }
-  .card-meta { display: flex; flex-wrap: wrap; gap: 8px; }
-  .card-meta span {
-    font-size: 12px; color: var(--text2);
-    display: flex; align-items: center; gap: 4px;
-    font-family: 'DM Mono', monospace;
-  }
-  .badge {
-    display: inline-block; font-size: 11px; padding: 2px 9px;
-    border-radius: 20px; font-weight: 500; margin-top: 8px;
-  }
-  .badge-授課 { background: var(--red-bg); color: var(--red); }
-  .badge-複訓 { background: var(--blue-bg); color: var(--blue); }
-  .badge-受訓 { background: var(--green-bg); color: var(--green); }
-  .badge-行政 { background: var(--amber-bg); color: var(--amber); }
+/* DAY DETAIL */
+.day-detail{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:14px;margin-bottom:14px;display:none}
+.day-detail.show{display:block}
+.day-detail-title{font-size:13px;font-weight:500;margin-bottom:10px;color:var(--text2);font-family:'DM Mono',monospace}
+.day-event-item{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);cursor:pointer}
+.day-event-item:last-child{border-bottom:none}
+.day-event-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.day-event-info{flex:1}
+.day-event-name{font-size:13px;font-weight:500}
+.day-event-meta{font-size:11px;color:var(--text2);font-family:'DM Mono',monospace;margin-top:2px}
 
-  /* STATS */
-  .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
-  .stat-card {
-    background: var(--bg2); border: 1px solid var(--border);
-    border-radius: var(--radius); padding: 16px;
-  }
-  .stat-label { font-size: 11px; color: var(--text2); margin-bottom: 6px; font-family: 'DM Mono', monospace; letter-spacing: .04em; }
-  .stat-val { font-size: 28px; font-weight: 700; letter-spacing: -1px; }
-  .stat-sub { font-size: 11px; color: var(--text2); margin-top: 2px; }
+/* SCHEDULE */
+.month-label{font-size:10px;font-weight:500;color:var(--text3);letter-spacing:.08em;text-transform:uppercase;font-family:'DM Mono',monospace;margin:18px 0 8px;padding-left:2px}
+.month-label:first-child{margin-top:4px}
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px;margin-bottom:8px;cursor:pointer;transition:border-color .12s;position:relative;overflow:hidden}
+.card:active{transform:scale(.98)}
+.card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px}
+.card.tag-授課-教官::before{background:var(--red)}
+.card.tag-授課-助教::before{background:var(--orange)}
+.card.tag-訓練::before{background:var(--blue)}
+.card.tag-其他::before{background:var(--amber)}
+.card.cat-生活::before{background:var(--green)}
+.card.cat-專案::before{background:var(--purple)}
+.card-title{font-size:13px;font-weight:500;margin-bottom:5px;padding-left:2px}
+.card-meta{display:flex;flex-wrap:wrap;gap:6px}
+.card-meta span{font-size:11px;color:var(--text2);display:flex;align-items:center;gap:3px;font-family:'DM Mono',monospace}
+.badge{display:inline-block;font-size:10px;padding:2px 8px;border-radius:20px;font-weight:500;margin-top:6px}
+.badge-授課-教官{background:var(--red-bg);color:var(--red)}
+.badge-授課-助教{background:var(--orange-bg);color:var(--orange)}
+.badge-訓練{background:var(--blue-bg);color:var(--blue)}
+.badge-其他{background:var(--amber-bg);color:var(--amber)}
+.badge-生活{background:var(--green-bg);color:var(--green)}
+.badge-專案{background:var(--purple-bg);color:var(--purple)}
+.expired-toggle{width:100%;display:flex;align-items:center;justify-content:space-between;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:11px 14px;cursor:pointer;color:var(--text2);font-size:12px;font-family:'Noto Sans TC',sans-serif;margin-bottom:8px}
 
-  .chart-label {
-    font-size: 11px; color: var(--text3); letter-spacing: .06em;
-    text-transform: uppercase; font-family: 'DM Mono', monospace;
-    margin: 20px 0 10px;
-  }
-  .bar-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
-  .bar-name { font-size: 12px; color: var(--text2); width: 52px; flex-shrink: 0; font-family: 'DM Mono', monospace; }
-  .bar-track { flex: 1; height: 22px; background: var(--bg3); border-radius: 6px; overflow: hidden; }
-  .bar-fill {
-    height: 100%; border-radius: 6px;
-    display: flex; align-items: center; padding-left: 8px;
-    min-width: 32px; transition: width .4s ease;
-  }
-  .bar-fill span { font-size: 11px; font-weight: 500; color: rgba(255,255,255,0.9); font-family: 'DM Mono', monospace; }
+/* STATS */
+.chart-label{font-size:10px;color:var(--text3);letter-spacing:.06em;text-transform:uppercase;font-family:'DM Mono',monospace;margin:16px 0 10px}
+.bar-row{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.bar-name{font-size:11px;color:var(--text2);width:72px;flex-shrink:0;font-family:'DM Mono',monospace}
+.bar-track{flex:1;height:20px;background:var(--bg3);border-radius:5px;overflow:hidden}
+.bar-fill{height:100%;border-radius:5px;display:flex;align-items:center;padding-left:8px;min-width:28px}
+.bar-fill span{font-size:10px;font-weight:500;color:rgba(255,255,255,.85);font-family:'DM Mono',monospace}
 
-  /* EMPTY */
-  .empty { text-align: center; padding: 60px 0; color: var(--text2); font-size: 14px; }
-  .empty-icon { font-size: 36px; margin-bottom: 12px; opacity: .4; }
+/* LOADING & EMPTY */
+.loading{text-align:center;padding:40px 0;color:var(--text2);font-size:13px}
+.spinner{width:22px;height:22px;border:2px solid var(--bg3);border-top-color:var(--text2);border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 10px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.empty{text-align:center;padding:48px 0;color:var(--text2);font-size:13px}
+.empty-icon{font-size:32px;margin-bottom:10px;opacity:.4}
 
-  /* BOTTOM NAV */
-  .bottom-nav {
-    position: fixed; bottom: 0; left: 0; right: 0;
-    background: rgba(28,28,30,0.92);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border-top: 1px solid var(--border);
-    display: flex; padding: 8px 0 20px;
-    z-index: 100;
-  }
-  .nav-item {
-    flex: 1; display: flex; flex-direction: column;
-    align-items: center; gap: 3px; cursor: pointer;
-    color: var(--text3); font-size: 10px; transition: color .15s;
-    padding: 4px 0;
-  }
-  .nav-item.active { color: var(--text); }
-  .nav-icon { font-size: 22px; }
+/* BOTTOM NAV */
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:rgba(26,26,28,0.95);backdrop-filter:blur(20px);border-top:1px solid var(--border);display:flex;padding:8px 0 20px;z-index:100}
+.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;color:var(--text3);font-size:10px;transition:color .15s;padding:4px 0}
+.nav-item.active{color:var(--text)}
+.nav-icon{font-size:20px}
 
-  /* MODAL */
-  .overlay {
-    position: fixed; inset: 0; background: rgba(0,0,0,.6);
-    z-index: 200; display: none; align-items: flex-end;
-    backdrop-filter: blur(4px);
-  }
-  .overlay.open { display: flex; }
-  .sheet {
-    background: var(--bg2); border-radius: 20px 20px 0 0;
-    padding: 0 20px 40px; width: 100%; max-height: 92vh;
-    overflow-y: auto; animation: slideUp .25s ease;
-  }
-  @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
-  .sheet-handle {
-    width: 36px; height: 4px; background: var(--bg3);
-    border-radius: 2px; margin: 12px auto 16px;
-  }
-  .sheet-title { font-size: 17px; font-weight: 600; margin-bottom: 20px; }
+/* OVERLAY & SHEET */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:200;display:none;align-items:flex-end;backdrop-filter:blur(4px)}
+.overlay.open{display:flex}
+.sheet{background:var(--bg2);border-radius:18px 18px 0 0;padding:0 18px 40px;width:100%;max-height:92vh;overflow-y:auto;animation:slideUp .2s ease}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.sheet-handle{width:36px;height:4px;background:var(--bg3);border-radius:2px;margin:12px auto 16px}
+.sheet-title{font-size:16px;font-weight:600;margin-bottom:18px}
 
-  .form-group { margin-bottom: 14px; }
-  .form-label { font-size: 11px; color: var(--text2); margin-bottom: 6px; display: block; letter-spacing: .04em; font-family: 'DM Mono', monospace; }
-  select, input[type=text], input[type=date], input[type=time], input[type=number], textarea {
-    width: 100%; background: var(--bg3); border: 1px solid var(--border);
-    color: var(--text); border-radius: var(--radius-sm);
-    padding: 11px 13px; font-size: 14px; font-family: 'Noto Sans TC', sans-serif;
-    appearance: none; -webkit-appearance: none;
-    outline: none; transition: border-color .15s;
-  }
-  select:focus, input:focus, textarea:focus { border-color: rgba(255,255,255,0.25); }
-  textarea { height: 80px; resize: none; }
-  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.form-group{margin-bottom:14px}
+.form-label{font-size:11px;color:var(--text2);margin-bottom:5px;display:block;letter-spacing:.04em;font-family:'DM Mono',monospace}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+select,input[type=text],input[type=date],input[type=time],textarea{width:100%;background:var(--bg3);border:1px solid var(--border);color:var(--text);border-radius:var(--r-sm);padding:10px 12px;font-size:13px;font-family:'Noto Sans TC',sans-serif;appearance:none;outline:none;transition:border-color .15s}
+select:focus,input:focus,textarea:focus{border-color:var(--border2)}
+textarea{height:72px;resize:none}
+.error-bar{background:var(--red-bg);border:1px solid var(--red);border-radius:var(--r-sm);padding:9px 12px;font-size:12px;color:var(--red);margin-bottom:12px;display:none}
+.btn-row{display:flex;gap:10px;margin-top:8px}
+.btn{flex:1;padding:12px;border-radius:var(--r-sm);font-size:13px;font-weight:500;cursor:pointer;border:none;font-family:'Noto Sans TC',sans-serif;transition:opacity .15s}
+.btn:active{opacity:.7}
+.btn-primary{background:var(--text);color:var(--bg)}
+.btn-ghost{background:var(--bg3);color:var(--text2)}
+.btn-danger{background:var(--red-bg);color:var(--red)}
+.combo-wrap{position:relative}
+.combo-back{font-size:11px;color:var(--text2);cursor:pointer;margin-top:4px;display:none;text-align:right}
 
-  .btn-row { display: flex; gap: 10px; margin-top: 6px; }
-  .btn {
-    flex: 1; padding: 13px; border-radius: var(--radius-sm);
-    font-size: 14px; font-weight: 500; cursor: pointer;
-    border: none; font-family: 'Noto Sans TC', sans-serif;
-    transition: opacity .15s;
-  }
-  .btn:active { opacity: .7; }
-  .btn-primary { background: var(--text); color: var(--bg); }
-  .btn-danger { background: var(--red-bg); color: var(--red); }
-  .btn-ghost { background: var(--bg3); color: var(--text2); }
-  .combo-wrap { position: relative; }
-  .combo-wrap select, .combo-wrap input { width: 100%; }
-  .combo-back { font-size: 11px; color: var(--text2); cursor: pointer; margin-top: 4px; display: none; text-align: right; }
+/* DETAIL */
+.detail-row{display:flex;gap:10px;margin-bottom:10px;align-items:flex-start}
+.detail-icon{font-size:15px;margin-top:1px;flex-shrink:0}
+.detail-text{font-size:13px;color:var(--text2);line-height:1.5}
+.detail-note{background:var(--bg3);border-radius:var(--r-sm);padding:10px 12px;font-size:12px;color:var(--text2);line-height:1.6;margin-top:4px;white-space:pre-wrap}
 
-  /* DETAIL SHEET */
-  .detail-row { display: flex; gap: 10px; margin-bottom: 12px; align-items: flex-start; }
-  .detail-icon { font-size: 16px; margin-top: 1px; flex-shrink: 0; }
-  .detail-text { font-size: 14px; color: var(--text2); line-height: 1.5; }
-  .detail-note {
-    background: var(--bg3); border-radius: var(--radius-sm);
-    padding: 12px 14px; font-size: 13px; color: var(--text2);
-    line-height: 1.6; margin-top: 4px; white-space: pre-wrap;
-  }
-
-  .error-bar {
-    background: var(--red-bg); border: 1px solid var(--red);
-    border-radius: var(--radius-sm); padding: 10px 14px;
-    font-size: 13px; color: var(--red); margin-bottom: 12px;
-    display: none;
-  }
+/* LOGIN */
+#login-page{position:fixed;inset:0;background:var(--bg);z-index:999;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem}
 </style>
 </head>
 <body>
 
-<!-- 登入頁面 -->
-<div id="login-page" style="display:none; position:fixed; inset:0; background:#111112; z-index:999; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:2rem;">
-  <div style="text-align:center; max-width:320px; width:100%;">
-    <div style="font-size:48px; margin-bottom:1rem;">🚒</div>
-    <h1 style="font-size:22px; font-weight:700; margin-bottom:8px; color:#f5f5f5;">課程管理</h1>
-    <p style="font-size:14px; color:#8e8e93; margin-bottom:2rem;">消防／EMTP教官課程行程管理系統</p>
-    <div id="login-error" style="display:none; background:rgba(255,69,58,0.12); border:1px solid #ff453a; border-radius:10px; padding:10px 14px; font-size:13px; color:#ff453a; margin-bottom:1rem;"></div>
-    <a href="/api/auth?action=login" style="display:flex; align-items:center; justify-content:center; gap:10px; width:100%; padding:13px; background:#f5f5f5; color:#111112; border-radius:12px; font-size:15px; font-weight:500; text-decoration:none; transition:opacity .15s;">
-      <svg width="20" height="20" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+<!-- LOGIN -->
+<div id="login-page" style="display:none">
+  <div style="text-align:center;max-width:300px;width:100%">
+    <div style="font-size:44px;margin-bottom:1rem">🚒</div>
+    <h1 style="font-size:20px;font-weight:700;margin-bottom:6px">課程管理</h1>
+    <p style="font-size:13px;color:var(--text2);margin-bottom:2rem">消防／EMTP教官課程行程管理</p>
+    <div id="login-error" style="display:none;background:var(--red-bg);border:1px solid var(--red);border-radius:var(--r-sm);padding:10px 12px;font-size:12px;color:var(--red);margin-bottom:1rem"></div>
+    <a href="/api/auth?action=login" style="display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:12px;background:#f5f5f5;color:#111;border-radius:12px;font-size:14px;font-weight:500;text-decoration:none">
+      <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
       使用 Google 帳號登入
     </a>
-    <p style="font-size:12px; color:#48484a; margin-top:1.5rem;">僅限授權人員使用</p>
+    <p style="font-size:11px;color:var(--text3);margin-top:1.5rem">僅限授權人員使用</p>
   </div>
 </div>
 
-<!-- 使用者資訊列 -->
-<div id="user-bar" style="display:none; background:rgba(28,28,30,0.9); border-bottom:1px solid rgba(255,255,255,0.08); padding:8px 20px; display:flex; align-items:center; justify-content:space-between;">
-  <div style="display:flex; align-items:center; gap:8px;">
-    <img id="user-avatar" src="" style="width:28px; height:28px; border-radius:50%; display:none;">
-    <span id="user-name" style="font-size:13px; color:#8e8e93;"></span>
+<div id="main-app" style="display:none">
+
+<!-- USER BAR -->
+<div id="user-bar" class="user-bar" style="display:none">
+  <div class="user-info">
+    <img id="user-avatar" src="" class="user-avatar" style="display:none">
+    <span id="user-name" class="user-email"></span>
   </div>
-  <a href="/api/auth?action=logout" style="font-size:12px; color:#ff453a; text-decoration:none;">登出</a>
+  <a href="/api/auth?action=logout" class="logout-btn">登出</a>
 </div>
 
-<div id="main-app" style="display:none;">
+<!-- TOP BAR -->
 <div class="topbar">
-  <div class="topbar-left">
-    <h1>課程管理</h1>
-    <p>0943ben · 消防／EMTP教官</p>
+  <div>
+    <div class="topbar-title">課程管理</div>
+    <div class="topbar-sub" id="cal-month-label"></div>
   </div>
   <button class="add-btn" onclick="openAdd()">＋</button>
 </div>
 
+<!-- TABS -->
 <div class="tabs">
-  <div class="tab active" onclick="switchTab('schedule')">行程</div>
+  <div class="tab active" onclick="switchTab('calendar')">行事曆</div>
+  <div class="tab" onclick="switchTab('schedule')">行程</div>
   <div class="tab" onclick="switchTab('stats')">統計</div>
 </div>
 
-<div id="schedule" class="section active">
-  <div class="loading" id="loading"><div class="spinner"></div>載入中...</div>
+<!-- CALENDAR TAB -->
+<div id="calendar" class="section active">
+  <div class="loading" id="cal-loading"><div class="spinner"></div>載入中...</div>
+  <div id="cal-content" style="display:none">
+    <div class="cal-header">
+      <button class="cal-nav" onclick="changeMonth(-1)">‹</button>
+      <div class="cal-month" id="cal-title"></div>
+      <button class="cal-nav" onclick="changeMonth(1)">›</button>
+    </div>
+    <div class="filters" id="filters">
+      <div class="filter-btn f-課程 active" onclick="toggleFilter('課程')"><div class="filter-dot" style="background:var(--blue)"></div>課程</div>
+      <div class="filter-btn f-生活 active" onclick="toggleFilter('生活')"><div class="filter-dot" style="background:var(--green)"></div>生活</div>
+      <div class="filter-btn f-專案 active" onclick="toggleFilter('專案')"><div class="filter-dot" style="background:var(--purple)"></div>專案</div>
+      <div class="filter-btn f-其他 active" onclick="toggleFilter('其他')"><div class="filter-dot" style="background:var(--amber)"></div>其他</div>
+    </div>
+    <div class="cal-grid" id="cal-grid"></div>
+    <div class="day-detail" id="day-detail">
+      <div class="day-detail-title" id="day-detail-title"></div>
+      <div id="day-detail-list"></div>
+    </div>
+  </div>
+</div>
+
+<!-- SCHEDULE TAB -->
+<div id="schedule" class="section">
+  <div class="loading" id="sch-loading" style="display:none"><div class="spinner"></div>載入中...</div>
   <div id="course-list"></div>
 </div>
 
+<!-- STATS TAB -->
 <div id="stats" class="section">
   <div class="chart-label">依標籤分類</div>
   <div id="tag-chart"></div>
-  <div class="chart-label" style="margin-top:20px">依課程類型分類</div>
+  <div class="chart-label">依課程類型分類</div>
   <div id="type-chart"></div>
+  <div class="chart-label">依類別分類</div>
+  <div id="cat-chart"></div>
 </div>
 
-
+</div><!-- main-app -->
 
 <!-- 新增/編輯 Sheet -->
 <div class="overlay" id="form-overlay" onclick="closeOverlay(event,'form-overlay')">
   <div class="sheet">
     <div class="sheet-handle"></div>
-    <div class="sheet-title" id="form-title">新增課程</div>
+    <div class="sheet-title" id="form-title">新增行程</div>
     <div class="error-bar" id="form-error"></div>
     <input type="hidden" id="f-id">
+
     <div class="form-group">
-      <label class="form-label">標籤（你的身份）</label>
-      <div class="combo-wrap">
-        <select id="f-tag-select" onchange="comboSelect('f-tag','f-tag-select'); toggleUnitField()">
-          <option value="授課-教官">授課-教官（主教官）</option>
-          <option value="授課-助教">授課-助教（助教）</option>
-          <option value="訓練">訓練（受訓/複訓）</option>
-          <option value="其他">其他（行政/會議）</option>
-          <option value="__custom__">＋ 自訂...</option>
-        </select>
-        <input type="text" id="f-tag" style="display:none" placeholder="輸入自訂標籤">
-      </div>
+      <label class="form-label">類別</label>
+      <select id="f-cat" onchange="toggleCourseFields()">
+        <option value="課程">課程</option>
+        <option value="生活">生活</option>
+        <option value="專案">專案</option>
+        <option value="其他">其他</option>
+      </select>
     </div>
-    <div class="form-row">
-      <div class="form-group" id="unit-group">
-        <label class="form-label">單位</label>
+
+    <div id="course-fields">
+      <div class="form-group">
+        <label class="form-label">標籤（你的身份）</label>
         <div class="combo-wrap">
-          <select id="f-unit-select" onchange="comboSelect('f-unit','f-unit-select')">
-            <option value="TEMTA">TEMTA</option>
-            <option value="公寓大廈">公寓大廈</option>
-            <option value="一大">一大</option>
+          <select id="f-tag-select" onchange="comboSelect('f-tag','f-tag-select');toggleUnitField()">
+            <option value="授課-教官">授課-教官（主教官）</option>
+            <option value="授課-助教">授課-助教（助教）</option>
+            <option value="訓練">訓練（受訓/複訓）</option>
+            <option value="其他">其他</option>
             <option value="__custom__">＋ 自訂...</option>
           </select>
-          <input type="text" id="f-unit" style="display:none" placeholder="輸入自訂單位">
+          <input type="text" id="f-tag" style="display:none" placeholder="輸入自訂標籤">
         </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group" id="unit-group">
+          <label class="form-label">單位</label>
+          <div class="combo-wrap">
+            <select id="f-unit-select" onchange="comboSelect('f-unit','f-unit-select')">
+              <option value="TEMTA">TEMTA</option>
+              <option value="公寓大廈">公寓大廈</option>
+              <option value="一大">一大</option>
+              <option value="後指部">後指部</option>
+              <option value="EOC">EOC</option>
+              <option value="__custom__">＋ 自訂...</option>
+            </select>
+            <input type="text" id="f-unit" style="display:none" placeholder="輸入自訂單位">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">課程類型</label>
+          <div class="combo-wrap">
+            <select id="f-type-select" onchange="comboSelect('f-type','f-type-select')">
+              <option value="T1">T1</option>
+              <option value="T1+">T1+</option>
+              <option value="T2">T2</option>
+              <option value="T2+">T2+</option>
+              <option value="TP">TP</option>
+              <option value="TP+">TP+</option>
+              <option value="服勤人員">服勤人員</option>
+              <option value="民眾版BLS">民眾版BLS</option>
+              <option value="EOC民眾版">EOC民眾版</option>
+              <option value="防災士">防災士</option>
+              <option value="義消BLS">義消BLS</option>
+              <option value="EMT-1">EMT-1</option>
+              <option value="EMT-1+">EMT-1+</option>
+              <option value="EMT-2+">EMT-2+</option>
+              <option value="__custom__">＋ 自訂...</option>
+            </select>
+            <input type="text" id="f-type" style="display:none" placeholder="輸入自訂類型">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-group" id="title-group" style="display:none">
+      <label class="form-label">標題</label>
+      <input type="text" id="f-title" placeholder="行程名稱">
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">開始日期</label>
+        <input type="date" id="f-date">
       </div>
       <div class="form-group">
-        <label class="form-label">課程類型</label>
-        <div class="combo-wrap">
-          <select id="f-type-select" onchange="comboSelect('f-type','f-type-select')">
-            <option value="T1">T1</option>
-            <option value="T1+">T1+</option>
-            <option value="T2">T2</option>
-            <option value="T2+">T2+</option>
-            <option value="TP">TP</option>
-            <option value="TP+">TP+</option>
-            <option value="__custom__">＋ 自訂...</option>
-          </select>
-          <input type="text" id="f-type" style="display:none" placeholder="輸入自訂課程類型">
-        </div>
+        <label class="form-label">結束日期（選填）</label>
+        <input type="date" id="f-end-date">
       </div>
-    </div>
-    <div class="form-group">
-      <label class="form-label">日期</label>
-      <input type="date" id="f-date">
     </div>
     <div class="form-row">
       <div class="form-group">
@@ -378,11 +361,11 @@
     </div>
     <div class="form-group">
       <label class="form-label">地點</label>
-      <input type="text" id="f-location" placeholder="如：一大禮堂">
+      <input type="text" id="f-location" placeholder="地點">
     </div>
     <div class="form-group">
-      <label class="form-label">備注／教材</label>
-      <textarea id="f-note" placeholder="課程細節、教材、備注..."></textarea>
+      <label class="form-label">備注</label>
+      <textarea id="f-note" placeholder="備注..."></textarea>
     </div>
     <div class="btn-row">
       <button class="btn btn-ghost" onclick="closeSheet('form-overlay')">取消</button>
@@ -402,170 +385,369 @@
 <script>
 const API = '/api/notion';
 let courses = [];
+let currentMonth = new Date();
+let activeFilters = new Set(['課程','生活','專案','其他']);
+let showExpired = false;
+let selectedDate = null;
 
+// ── AUTH ──
+async function checkAuth() {
+  const err = new URLSearchParams(location.search).get('error');
+  try {
+    const r = await fetch('/api/auth?action=me');
+    if (r.ok) {
+      const u = await r.json();
+      document.getElementById('login-page').style.display = 'none';
+      document.getElementById('main-app').style.display = 'block';
+      document.getElementById('user-bar').style.display = 'flex';
+      document.getElementById('user-name').textContent = u.email;
+      if (u.picture) { const a=document.getElementById('user-avatar'); a.src=u.picture; a.style.display='block'; }
+      await loadCourses();
+    } else showLogin(err);
+  } catch { showLogin(err); }
+}
+function showLogin(err) {
+  document.getElementById('login-page').style.display = 'flex';
+  document.getElementById('main-app').style.display = 'none';
+  if (err) { const e=document.getElementById('login-error'); e.textContent={unauthorized:'您的帳號沒有存取權限',auth_failed:'登入失敗'}[err]||'登入時發生錯誤'; e.style.display='block'; }
+}
+
+// ── DATA ──
 async function loadCourses() {
-  document.getElementById('loading').style.display = 'block';
-  document.getElementById('course-list').innerHTML = '';
   try {
     const r = await fetch(`${API}?action=list`);
     courses = await r.json();
+    renderCalendar();
     renderSchedule();
     renderStats();
+    document.getElementById('cal-loading').style.display = 'none';
+    document.getElementById('cal-content').style.display = 'block';
   } catch(e) {
-    document.getElementById('loading').innerHTML = '<div class="empty"><div class="empty-icon">⚠️</div>載入失敗，請重試</div>';
+    document.getElementById('cal-loading').innerHTML = '<div class="empty"><div class="empty-icon">⚠️</div>載入失敗，請重試</div>';
   }
-  document.getElementById('loading').style.display = 'none';
 }
 
-function fmtDate(d) {
-  if (!d) return '';
-  const dt = new Date(d + 'T00:00:00');
-  const days = ['日','一','二','三','四','五','六'];
-  return `${dt.getMonth()+1}/${dt.getDate()}（${days[dt.getDay()]}）`;
+// ── CALENDAR ──
+const CAT_COLOR = { '課程':'#2d8cff','生活':'#2dcc70','專案':'#9b59b6','其他':'#ffc107' };
+const TAG_COLOR = { '授課-教官':'#ff4444','授課-助教':'#ff8c00','訓練':'#2d8cff','其他':'#ffc107' };
+
+function getEventColor(c) {
+  if (c.category && c.category !== '課程') return CAT_COLOR[c.category] || '#888';
+  return TAG_COLOR[c.tag] || '#888';
 }
 
-let showExpired = false;
+function getEventClass(c) {
+  if (c.category === '生活') return 'cat-生活';
+  if (c.category === '專案') return 'cat-專案';
+  if (!c.category || c.category === '課程') return `tag-${c.tag}`;
+  return 'tag-其他';
+}
 
-function renderSchedule() {
-  const list = document.getElementById('course-list');
-  if (!courses.length) {
-    list.innerHTML = '<div class="empty"><div class="empty-icon">📅</div>尚無課程行程</div>';
-    return;
+function renderCalendar() {
+  const y = currentMonth.getFullYear();
+  const m = currentMonth.getMonth();
+  const months = ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
+  document.getElementById('cal-title').textContent = `${y} / ${months[m]}`;
+  document.getElementById('cal-month-label').textContent = `${y}年${months[m]}`;
+
+  const first = new Date(y, m, 1);
+  const last = new Date(y, m+1, 0);
+  const startDow = first.getDay();
+  const today = new Date(); today.setHours(0,0,0,0);
+
+  // 篩選課程
+  const filtered = courses.filter(c => {
+    const cat = c.category || '課程';
+    return activeFilters.has(cat);
+  });
+
+  const grid = document.getElementById('cal-grid');
+  const dows = ['日','一','二','三','四','五','六'];
+  let html = dows.map(d=>`<div class="cal-dow">${d}</div>`).join('');
+
+  // 建立每天的事件對應
+  function getEventsForDay(date) {
+    const ds = toDateStr(date);
+    return filtered.filter(c => {
+      const start = c.date;
+      const end = c.endDate || c.date;
+      return ds >= start && ds <= end;
+    });
   }
-  const now = new Date();
-  const sorted = [...courses].sort((a,b) => a.date.localeCompare(b.date));
-  const active = sorted.filter(c => new Date(c.date + 'T23:59:59') >= now);
-  const expired = sorted.filter(c => new Date(c.date + 'T23:59:59') < now);
+  function toDateStr(d) {
+    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  }
 
-  let html = '';
+  // 渲染格子
+  const totalCells = Math.ceil((startDow + last.getDate()) / 7) * 7;
+  for (let i = 0; i < totalCells; i++) {
+    const dayOffset = i - startDow;
+    const date = new Date(y, m, 1 + dayOffset);
+    const isThisMonth = date.getMonth() === m;
+    const isToday = date.getTime() === today.getTime();
+    const ds = toDateStr(date);
+    const evs = getEventsForDay(date);
 
-  // 過期行程放最上面（收合）
-  if (expired.length) {
-    html += `
-    <div style="margin-bottom:16px;">
-      <button onclick="toggleExpired()" style="width:100%;display:flex;align-items:center;justify-content:space-between;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:12px 16px;cursor:pointer;color:var(--text2);font-size:13px;font-family:'Noto Sans TC',sans-serif;">
-        <span>⏰ 已過期行程（${expired.length} 筆）</span>
-        <span id="expired-arrow" style="transition:transform .2s">${showExpired ? '▲' : '▼'}</span>
-      </button>
-      <div id="expired-list" style="display:${showExpired ? 'block' : 'none'};margin-top:8px;opacity:0.5;">
-        ${[...expired].reverse().map(c => cardHTML(c, true)).join('')}
-      </div>
+    let evHtml = '';
+    evs.slice(0,3).forEach(c => {
+      const color = getEventColor(c);
+      const isStart = c.date === ds;
+      const isEnd = (c.endDate || c.date) === ds;
+      const isSpan = c.endDate && c.endDate !== c.date;
+      let cls = isSpan ? (isStart ? 'span-start' : isEnd ? 'span-end' : 'span-mid') : '';
+      const label = isStart ? (c.title || `${c.tag||''} ${c.type||''}`.trim()) : '';
+      evHtml += `<div class="cal-event-bar ${cls}" style="background:${color}22;color:${color};border-left:${isStart||!isSpan?`2px solid ${color}`:'none'}">${label}</div>`;
+    });
+    if (evs.length > 3) evHtml += `<div style="font-size:9px;color:var(--text3);padding-left:3px">+${evs.length-3}</div>`;
+
+    html += `<div class="cal-cell${!isThisMonth?' other-month':''}${isToday?' today':''}" onclick="selectDay('${ds}')">
+      <div class="cal-day">${date.getDate()}</div>
+      <div class="cal-events">${evHtml}</div>
     </div>`;
   }
+  grid.innerHTML = html;
 
-  // 未來行程（由近到遠）
-  if (active.length) {
-    const groups = {};
-    active.forEach(c => {
-      const ym = c.date.slice(0,7);
-      if (!groups[ym]) groups[ym] = [];
-      groups[ym].push(c);
-    });
-    html += Object.entries(groups).map(([ym, cs]) => {
-      const [y,m] = ym.split('-');
-      return `<div class="month-label">${y} 年 ${parseInt(m)} 月</div>` +
-        cs.map(c => cardHTML(c, false)).join('');
-    }).join('');
-  } else {
-    html += '<div class="empty" style="padding:24px 0"><div class="empty-icon">📅</div>目前沒有即將到來的行程</div>';
-  }
-
-  list.innerHTML = html;
+  // 如果有選中日期，重新渲染詳情
+  if (selectedDate) showDayDetail(selectedDate);
 }
 
+function selectDay(ds) {
+  selectedDate = selectedDate === ds ? null : ds;
+  if (selectedDate) showDayDetail(ds);
+  else { document.getElementById('day-detail').classList.remove('show'); }
+  renderCalendar();
+}
+
+function showDayDetail(ds) {
+  const [y,m,d] = ds.split('-').map(Number);
+  const days = ['日','一','二','三','四','五','六'];
+  const dt = new Date(y,m-1,d);
+  const evs = courses.filter(c => {
+    const cat = c.category || '課程';
+    if (!activeFilters.has(cat)) return false;
+    const end = c.endDate || c.date;
+    return ds >= c.date && ds <= end;
+  });
+  document.getElementById('day-detail-title').textContent = `${m}/${d}（${days[dt.getDay()]}）`;
+  document.getElementById('day-detail-list').innerHTML = evs.length ?
+    evs.map(c => `
+      <div class="day-event-item" onclick="openDetail('${c.id}')">
+        <div class="day-event-dot" style="background:${getEventColor(c)}"></div>
+        <div class="day-event-info">
+          <div class="day-event-name">${c.title || `[${c.tag||''}/${c.unit||''}] ${c.type||''}`}</div>
+          ${c.startTime ? `<div class="day-event-meta">${c.startTime}–${c.endTime}</div>` : ''}
+          ${c.location ? `<div class="day-event-meta">📍 ${c.location}</div>` : ''}
+        </div>
+      </div>`).join('') :
+    '<div style="font-size:13px;color:var(--text2);padding:8px 0">這天沒有行程</div>';
+  document.getElementById('day-detail').classList.add('show');
+}
+
+function changeMonth(dir) {
+  currentMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth()+dir, 1);
+  selectedDate = null;
+  document.getElementById('day-detail').classList.remove('show');
+  renderCalendar();
+}
+
+function toggleFilter(cat) {
+  if (activeFilters.has(cat)) activeFilters.delete(cat);
+  else activeFilters.add(cat);
+  document.querySelectorAll('.filter-btn').forEach(b => {
+    const c = b.className.match(/f-(\S+)/)?.[1];
+    if (c) b.classList.toggle('active', activeFilters.has(c));
+  });
+  renderCalendar();
+  if (selectedDate) showDayDetail(selectedDate);
+}
+
+// ── SCHEDULE ──
+function renderSchedule() {
+  const list = document.getElementById('course-list');
+  if (!courses.length) { list.innerHTML = '<div class="empty"><div class="empty-icon">📅</div>尚無行程</div>'; return; }
+  const now = new Date(); now.setHours(0,0,0,0);
+  const sorted = [...courses].sort((a,b)=>a.date.localeCompare(b.date));
+  const active = sorted.filter(c => new Date(c.date+'T23:59:59') >= now);
+  const expired = sorted.filter(c => new Date(c.date+'T23:59:59') < now);
+  let html = '';
+  if (expired.length) {
+    html += `<button class="expired-toggle" onclick="toggleExpired()">
+      <span>⏰ 已過期行程（${expired.length} 筆）</span>
+      <span id="expired-arrow">${showExpired?'▲':'▼'}</span>
+    </button>
+    <div id="expired-list" style="display:${showExpired?'block':'none'};margin-bottom:8px;opacity:.45">
+      ${[...expired].reverse().map(c=>cardHTML(c,true)).join('')}
+    </div>`;
+  }
+  if (active.length) {
+    const groups={};
+    active.forEach(c=>{const ym=c.date.slice(0,7);if(!groups[ym])groups[ym]=[];groups[ym].push(c);});
+    html+=Object.entries(groups).map(([ym,cs])=>{
+      const[y,m]=ym.split('-');
+      return`<div class="month-label">${y} 年 ${parseInt(m)} 月</div>`+cs.map(c=>cardHTML(c,false)).join('');
+    }).join('');
+  } else html+='<div class="empty" style="padding:24px 0"><div class="empty-icon">📅</div>目前沒有即將到來的行程</div>';
+  list.innerHTML=html;
+}
+
+function fmtDate(d){if(!d)return'';const dt=new Date(d+'T00:00:00');const days=['日','一','二','三','四','五','六'];return`${dt.getMonth()+1}/${dt.getDate()}（${days[dt.getDay()]}）`}
+
 function cardHTML(c, isExpired) {
-  return `
-  <div class="card tag-${c.tag}${isExpired ? ' expired' : ''}" onclick="openDetail('${c.id}')">
-    <div class="card-title">[${c.tag}/${c.unit}] ${c.type}</div>
+  const cls = getEventClass(c);
+  const title = c.title || `[${c.tag||''}/${c.unit||''}] ${c.type||''}`.replace('/]','').replace('[/','');
+  const badgeCls = c.category==='生活'?'badge-生活':c.category==='專案'?'badge-專案':`badge-${c.tag||'其他'}`;
+  const badgeLabel = c.category==='生活'?'生活':c.category==='專案'?'專案':(c.tag||'其他');
+  const endDateStr = c.endDate && c.endDate!==c.date ? ` → ${fmtDate(c.endDate)}` : '';
+  return `<div class="card ${cls}" onclick="openDetail('${c.id}')">
+    <div class="card-title">${title}</div>
     <div class="card-meta">
-      <span>📅 ${fmtDate(c.date)}</span>
-      ${c.startTime ? `<span>🕐 ${c.startTime}&ndash;${c.endTime}</span>` : ''}
-      ${c.location ? `<span>📍 ${c.location}</span>` : ''}
+      <span>📅 ${fmtDate(c.date)}${endDateStr}</span>
+      ${c.startTime?`<span>🕐 ${c.startTime}–${c.endTime}</span>`:''}
+      ${c.location?`<span>📍 ${c.location}</span>`:''}
     </div>
-    <span class="badge badge-${c.tag}">${c.tag}</span>
+    <span class="badge ${badgeCls}">${badgeLabel}</span>
   </div>`;
 }
 
-function toggleExpired() {
-  showExpired = !showExpired;
-  document.getElementById('expired-list').style.display = showExpired ? 'block' : 'none';
-  document.getElementById('expired-arrow').textContent = showExpired ? '▲' : '▼';
-}
+function toggleExpired(){showExpired=!showExpired;renderSchedule()}
 
-function renderStats() {
-  // 依標籤分類
-  const tagColors = {
-    '授課-教官': '#ff453a',
-    '授課-助教': '#ff8c00',
-    '訓練': '#0a84ff',
-    '其他': '#ffd60a'
-  };
-  const tagCounts = {};
-  courses.forEach(c => {
-    const tag = c.tag || '其他';
-    tagCounts[tag] = (tagCounts[tag] || 0) + 1;
+// ── STATS ──
+function renderStats(){
+  const tagColors={'授課-教官':'#ff4444','授課-助教':'#ff8c00','訓練':'#2d8cff','其他':'#ffc107'};
+  const catColors={'課程':'#2d8cff','生活':'#2dcc70','專案':'#9b59b6','其他':'#ffc107'};
+  function makeChart(counts,colors,el){
+    const max=Math.max(1,...Object.values(counts));
+    document.getElementById(el).innerHTML=Object.entries(counts).sort((a,b)=>b[1]-a[1]).map(([k,n])=>`
+    <div class="bar-row"><div class="bar-name">${k}</div><div class="bar-track">
+      <div class="bar-fill" style="width:${Math.round(n/max*100)}%;background:${colors[k]||'#636366'}"><span>${n} 場</span></div>
+    </div></div>`).join('')||'<div style="color:var(--text3);font-size:12px">尚無資料</div>';
+  }
+  const tags={},types={},cats={};
+  courses.forEach(c=>{
+    if(c.tag) tags[c.tag]=(tags[c.tag]||0)+1;
+    if(c.type) types[c.type]=(types[c.type]||0)+1;
+    const cat=c.category||'課程'; cats[cat]=(cats[cat]||0)+1;
   });
-  const maxTag = Math.max(1, ...Object.values(tagCounts));
-  document.getElementById('tag-chart').innerHTML = Object.entries(tagCounts)
-    .sort((a,b) => b[1]-a[1])
-    .map(([tag, n]) => `
-    <div class="bar-row">
-      <div class="bar-name" style="font-size:11px;width:72px">${tag}</div>
-      <div class="bar-track">
-        <div class="bar-fill" style="width:${Math.round(n/maxTag*100)}%;background:${tagColors[tag]||'#636366'}">
-          <span>${n} 場</span>
-        </div>
-      </div>
-    </div>`).join('') || '<div style="color:var(--text3);font-size:13px">尚無資料</div>';
-
-
-
-  const types = {};
-  courses.forEach(c => { if(c.type) types[c.type] = (types[c.type]||0)+1; });
-  const maxT = Math.max(1,...Object.values(types));
-  document.getElementById('type-chart').innerHTML = Object.entries(types)
-    .sort((a,b) => b[1]-a[1])
-    .map(([t,n]) => `
-    <div class="bar-row">
-      <div class="bar-name" style="font-size:11px;width:72px">${t}</div>
-      <div class="bar-track">
-        <div class="bar-fill" style="width:${Math.round(n/maxT*100)}%;background:#636366">
-          <span>${n} 場</span>
-        </div>
-      </div>
-    </div>`).join('') || '<div style="color:var(--text3);font-size:13px">尚無資料</div>';
+  makeChart(tags,tagColors,'tag-chart');
+  makeChart(types,{},'type-chart');
+  makeChart(cats,catColors,'cat-chart');
 }
 
-function switchTab(tab) {
-  document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('active',['schedule','stats'][i]===tab));
-  document.querySelectorAll('.section').forEach(s=>s.classList.toggle('active',s.id===tab));
+// ── FORM ──
+function toggleCourseFields(){
+  const cat=document.getElementById('f-cat').value;
+  const isCourse=cat==='課程';
+  document.getElementById('course-fields').style.display=isCourse?'block':'none';
+  document.getElementById('title-group').style.display=isCourse?'none':'block';
+}
+function toggleUnitField(){
+  const tag=getComboValue('f-tag','f-tag-select');
+  document.getElementById('unit-group').style.display=(tag==='訓練'||tag==='其他')?'none':'block';
+}
+function comboSelect(inputId,selectId){
+  const sel=document.getElementById(selectId);const inp=document.getElementById(inputId);
+  if(sel.value==='__custom__'){
+    sel.style.display='none';inp.style.display='block';inp.value='';inp.focus();
+    let back=inp.nextElementSibling;
+    if(!back||!back.classList.contains('combo-back')){back=document.createElement('div');back.className='combo-back';back.textContent='← 返回選單';back.onclick=()=>comboBack(inputId,selectId);inp.after(back);}
+    back.style.display='block';
+  } else { inp.value=sel.value; }
+}
+function comboBack(inputId,selectId){
+  const sel=document.getElementById(selectId);const inp=document.getElementById(inputId);
+  sel.style.display='block';inp.style.display='none';
+  sel.value=sel.options[0].value;inp.value=sel.options[0].value;
+  const back=inp.nextElementSibling;if(back)back.style.display='none';
+}
+function getComboValue(inputId,selectId){
+  const inp=document.getElementById(inputId);
+  return inp.style.display==='none'?document.getElementById(selectId).value:inp.value.trim();
+}
+function setComboValue(inputId,selectId,value){
+  const sel=document.getElementById(selectId);const inp=document.getElementById(inputId);
+  const opt=Array.from(sel.options).find(o=>o.value===value&&o.value!=='__custom__');
+  if(opt){sel.style.display='block';inp.style.display='none';sel.value=value;inp.value=value;const back=inp.nextElementSibling;if(back)back.style.display='none';}
+  else{sel.style.display='none';inp.style.display='block';inp.value=value||'';}
 }
 
-function openAdd() {
-  document.getElementById('form-title').textContent = '新增課程';
-  document.getElementById('f-id').value = '';
+function openAdd(){
+  document.getElementById('form-title').textContent='新增行程';
+  document.getElementById('f-id').value='';
+  document.getElementById('f-cat').value='課程';
+  toggleCourseFields();
   setComboValue('f-tag','f-tag-select','授課-教官');
-  setComboValue('f-unit','f-unit-select','一大');
-  setComboValue('f-type','f-type-select','義消BLS');
-  document.getElementById('f-date').value = new Date().toISOString().slice(0,10);
-  document.getElementById('f-start').value = '';
-  document.getElementById('f-end').value = '';
-  document.getElementById('f-location').value = '';
-  document.getElementById('f-note').value = '';
-  document.getElementById('form-error').style.display = 'none';
+  setComboValue('f-unit','f-unit-select','TEMTA');
+  setComboValue('f-type','f-type-select','T1');
+  toggleUnitField();
+  document.getElementById('f-date').value=new Date().toISOString().slice(0,10);
+  document.getElementById('f-end-date').value='';
+  document.getElementById('f-start').value='';
+  document.getElementById('f-end').value='';
+  document.getElementById('f-location').value='';
+  document.getElementById('f-note').value='';
+  document.getElementById('f-title').value='';
+  document.getElementById('form-error').style.display='none';
   document.getElementById('form-overlay').classList.add('open');
 }
 
-function openDetail(id) {
-  const c = courses.find(x=>x.id===id);
-  if (!c) return;
-  document.getElementById('detail-content').innerHTML = `
-    <div class="sheet-title">[${c.tag}/${c.unit}] ${c.type}</div>
-    <span class="badge badge-${c.tag}" style="margin-bottom:16px;display:inline-block">${c.tag}</span>
-    ${c.date ? `<div class="detail-row"><div class="detail-icon">📅</div><div class="detail-text">${fmtDate(c.date)}</div></div>` : ''}
-    ${c.startTime ? `<div class="detail-row"><div class="detail-icon">🕐</div><div class="detail-text">${c.startTime} – ${c.endTime}</div></div>` : ''}
-    ${c.location ? `<div class="detail-row"><div class="detail-icon">📍</div><div class="detail-text">${c.location}</div></div>` : ''}
-    ${c.note ? `<div style="margin-top:8px"><div class="form-label">備注</div><div class="detail-note">${c.note}</div></div>` : ''}
+function openEdit(id){
+  const c=courses.find(x=>x.id===id); if(!c)return;
+  document.getElementById('detail-overlay').classList.remove('open');
+  document.getElementById('form-title').textContent='編輯行程';
+  document.getElementById('f-id').value=c.id;
+  document.getElementById('f-cat').value=c.category||'課程';
+  toggleCourseFields();
+  setComboValue('f-tag','f-tag-select',c.tag||'授課-教官');
+  setComboValue('f-unit','f-unit-select',c.unit||'');
+  setComboValue('f-type','f-type-select',c.type||'');
+  toggleUnitField();
+  document.getElementById('f-date').value=c.date||'';
+  document.getElementById('f-end-date').value=c.endDate||'';
+  document.getElementById('f-start').value=c.startTime||'';
+  document.getElementById('f-end').value=c.endTime||'';
+  document.getElementById('f-location').value=c.location||'';
+  document.getElementById('f-note').value=c.note||'';
+  document.getElementById('f-title').value=c.title||'';
+  document.getElementById('form-error').style.display='none';
+  document.getElementById('form-overlay').classList.add('open');
+}
+
+async function saveCourse(){
+  const id=document.getElementById('f-id').value;
+  const cat=document.getElementById('f-cat').value;
+  const isCourse=cat==='課程';
+  const tag=isCourse?getComboValue('f-tag','f-tag-select'):'';
+  const unit=isCourse&&document.getElementById('unit-group').style.display!=='none'?getComboValue('f-unit','f-unit-select'):'';
+  const type=isCourse?getComboValue('f-type','f-type-select'):'';
+  const customTitle=document.getElementById('f-title').value.trim();
+  const date=document.getElementById('f-date').value;
+  const endDate=document.getElementById('f-end-date').value;
+  const title=isCourse?`[${tag}/${unit}] ${type}`:customTitle;
+  if(!date){showError('請選擇日期');return;}
+  if(!isCourse&&!customTitle){showError('請輸入標題');return;}
+  const body={tag,unit,type,category:cat,title,date,endDate,startTime:document.getElementById('f-start').value,endTime:document.getElementById('f-end').value,location:document.getElementById('f-location').value,note:document.getElementById('f-note').value};
+  try{
+    const url=id?`${API}?action=update&pageId=${id}`:`${API}?action=create`;
+    const method=id?'PATCH':'POST';
+    const r=await fetch(url,{method,headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+    const data=await r.json();
+    if(data.error){showError(data.error);return;}
+    closeSheet('form-overlay');
+    await loadCourses();
+  }catch(e){showError('儲存失敗，請重試');}
+}
+
+function openDetail(id){
+  const c=courses.find(x=>x.id===id);if(!c)return;
+  const title=c.title||`[${c.tag||''}/${c.unit||''}] ${c.type||''}`;
+  const color=getEventColor(c);
+  const endDateStr=c.endDate&&c.endDate!==c.date?` → ${fmtDate(c.endDate)}`:'';
+  document.getElementById('detail-content').innerHTML=`
+    <div class="sheet-title">${title}</div>
+    ${c.date?`<div class="detail-row"><div class="detail-icon">📅</div><div class="detail-text">${fmtDate(c.date)}${endDateStr}</div></div>`:''}
+    ${c.startTime?`<div class="detail-row"><div class="detail-icon">🕐</div><div class="detail-text">${c.startTime} – ${c.endTime}</div></div>`:''}
+    ${c.location?`<div class="detail-row"><div class="detail-icon">📍</div><div class="detail-text">${c.location}</div></div>`:''}
+    ${c.note?`<div style="margin-top:8px"><div class="form-label">備注</div><div class="detail-note">${c.note}</div></div>`:''}
     <div class="btn-row" style="margin-top:20px">
       <button class="btn btn-danger" onclick="deleteCourse('${c.id}')">刪除</button>
       <button class="btn btn-primary" onclick="openEdit('${c.id}')">編輯</button>
@@ -573,228 +755,23 @@ function openDetail(id) {
   document.getElementById('detail-overlay').classList.add('open');
 }
 
-function openEdit(id) {
-  const c = courses.find(x=>x.id===id);
-  if (!c) return;
-  document.getElementById('detail-overlay').classList.remove('open');
-  document.getElementById('form-title').textContent = '編輯課程';
-  document.getElementById('f-id').value = c.id;
-  setComboValue('f-tag','f-tag-select',c.tag);
-  setComboValue('f-unit','f-unit-select',c.unit);
-  setComboValue('f-type','f-type-select',c.type);
-  document.getElementById('f-date').value = c.date;
-  document.getElementById('f-start').value = c.startTime;
-  document.getElementById('f-end').value = c.endTime;
-  document.getElementById('f-location').value = c.location;
-  document.getElementById('f-note').value = c.note;
-  document.getElementById('form-error').style.display = 'none';
-  document.getElementById('form-overlay').classList.add('open');
+async function deleteCourse(id){
+  if(!confirm('確定要刪除嗎？'))return;
+  try{await fetch(`${API}?action=delete&pageId=${id}`,{method:'DELETE'});closeSheet('detail-overlay');await loadCourses();}
+  catch(e){alert('刪除失敗');}
 }
 
-async function saveCourse() {
-  const id = document.getElementById('f-id').value;
-  const body = {
-    tag: getComboValue('f-tag','f-tag-select'),
-    unit: getComboValue('f-unit','f-unit-select'),
-    type: getComboValue('f-type','f-type-select'),
-    date: document.getElementById('f-date').value,
-    startTime: document.getElementById('f-start').value,
-    endTime: document.getElementById('f-end').value,
-    location: document.getElementById('f-location').value,
-    note: document.getElementById('f-note').value,
-  };
-  if (!body.date) { showError('請選擇日期'); return; }
-  try {
-    const url = id ? `${API}?action=update&pageId=${id}` : `${API}?action=create`;
-    const method = id ? 'PATCH' : 'POST';
-    const r = await fetch(url, { method, headers: {'Content-Type':'application/json'}, body: JSON.stringify(body) });
-    const data = await r.json();
-    if (data.error) { showError(data.error); return; }
-    closeSheet('form-overlay');
-    await loadCourses();
-  } catch(e) { showError('儲存失敗，請重試'); }
+function showError(msg){const e=document.getElementById('form-error');e.textContent=msg;e.style.display='block';}
+function closeSheet(id){document.getElementById(id).classList.remove('open');}
+function closeOverlay(e,id){if(e.target===document.getElementById(id))closeSheet(id);}
+
+function switchTab(tab){
+  document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('active',['calendar','schedule','stats'][i]===tab));
+  document.querySelectorAll('.section').forEach(s=>s.classList.toggle('active',s.id===tab));
+  if(tab==='stats')renderStats();
 }
-
-async function deleteCourse(id) {
-  if (!confirm('確定要刪除這個課程嗎？')) return;
-  try {
-    await fetch(`${API}?action=delete&pageId=${id}`, { method: 'DELETE' });
-    closeSheet('detail-overlay');
-    await loadCourses();
-  } catch(e) { alert('刪除失敗，請重試'); }
-}
-
-function toggleUnitField() {
-  const tag = getComboValue('f-tag', 'f-tag-select');
-  const unitGroup = document.getElementById('unit-group');
-  if (tag === '訓練' || tag === '其他') {
-    unitGroup.style.display = 'none';
-    document.getElementById('f-unit').value = '';
-    document.getElementById('f-unit-select').value = '';
-  } else {
-    unitGroup.style.display = 'block';
-  }
-}
-
-async function addToDropdown(inputId, selectId) {
-  const inp = document.getElementById(inputId);
-  const sel = document.getElementById(selectId);
-  const value = inp.value.trim();
-  if (!value) return;
-
-  // 儲存到 Notion 設定頁面
-  try {
-    await fetch(`${API}?action=addOption`, {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({ field: inputId, value })
-    });
-  } catch(e) {}
-
-  // 加入下拉選單
-  const opt = document.createElement('option');
-  opt.value = value;
-  opt.textContent = value;
-  sel.insertBefore(opt, sel.lastElementChild); // 插入到「自訂」前面
-
-  // 切換回下拉模式
-  comboBack(inputId, selectId);
-  sel.value = value;
-  inp.value = value;
-}
-
-function comboSelect(inputId, selectId) {
-  const sel = document.getElementById(selectId);
-  const inp = document.getElementById(inputId);
-  if (sel.value === '__custom__') {
-    sel.style.display = 'none';
-    inp.style.display = 'block';
-    inp.value = '';
-    inp.focus();
-    // 加入返回按鈕
-    let back = sel.nextElementSibling?.nextElementSibling;
-    if (!back || !back.classList.contains('combo-back')) {
-      back = document.createElement('div');
-      back.className = 'combo-back';
-      back.textContent = '← 返回選單';
-      back.style.display = 'block';
-      back.onclick = () => comboBack(inputId, selectId);
-      // 加入「加入選單」按鈕
-    let addBtn = inp.nextElementSibling?.nextElementSibling;
-    if (!addBtn || !addBtn.classList.contains('combo-add')) {
-      addBtn = document.createElement('div');
-      addBtn.className = 'combo-back combo-add';
-      addBtn.style.color = 'var(--blue)';
-      addBtn.textContent = '＋ 加入選單';
-      addBtn.onclick = () => addToDropdown(inputId, selectId);
-      back.after(addBtn);
-    } else {
-      addBtn.style.display = 'block';
-    }
-    inp.after(back);
-    } else {
-      back.style.display = 'block';
-      let addBtn = inp.nextElementSibling?.nextElementSibling;
-      if (addBtn && addBtn.classList.contains('combo-add')) addBtn.style.display = 'block';
-    }
-  } else {
-    inp.value = sel.value;
-  }
-}
-
-function comboBack(inputId, selectId) {
-  const sel = document.getElementById(selectId);
-  const inp = document.getElementById(inputId);
-  sel.style.display = 'block';
-  inp.style.display = 'none';
-  sel.value = sel.options[0].value;
-  inp.value = sel.options[0].value;
-  inp.nextElementSibling.style.display = 'none';
-}
-
-function getComboValue(inputId, selectId) {
-  const sel = document.getElementById(selectId);
-  const inp = document.getElementById(inputId);
-  if (inp.style.display === 'none') return sel.value;
-  return inp.value.trim();
-}
-
-function setComboValue(inputId, selectId, value) {
-  const sel = document.getElementById(selectId);
-  const inp = document.getElementById(inputId);
-  // 找是否有對應選項
-  const opt = Array.from(sel.options).find(o => o.value === value);
-  if (opt && opt.value !== '__custom__') {
-    sel.style.display = 'block';
-    inp.style.display = 'none';
-    sel.value = value;
-    inp.value = value;
-    // 隱藏返回按鈕
-    const back = inp.nextElementSibling;
-    if (back && back.classList.contains('combo-back')) back.style.display = 'none';
-  } else {
-    sel.style.display = 'none';
-    inp.style.display = 'block';
-    inp.value = value;
-    // 顯示返回按鈕
-    let back = inp.nextElementSibling;
-    if (!back || !back.classList.contains('combo-back')) {
-      back = document.createElement('div');
-      back.className = 'combo-back';
-      back.textContent = '← 返回選單';
-      back.style.display = 'block';
-      back.onclick = () => comboBack(inputId, selectId);
-      inp.after(back);
-    } else {
-      back.style.display = 'block';
-    }
-  }
-}
-
-function showError(msg) {
-  const el = document.getElementById('form-error');
-  el.textContent = msg; el.style.display = 'block';
-}
-function closeSheet(id) { document.getElementById(id).classList.remove('open'); }
-function closeOverlay(e, id) { if (e.target === document.getElementById(id)) closeSheet(id); }
-
-// 登入驗證
-async function checkAuth() {
-  const urlParams = new URLSearchParams(window.location.search);
-  const error = urlParams.get('error');
-  try {
-    const r = await fetch('/api/auth?action=me');
-    if (r.ok) {
-      const user = await r.json();
-      document.getElementById('login-page').style.display = 'none';
-      document.getElementById('main-app').style.display = 'block';
-      document.getElementById('user-bar').style.display = 'flex';
-      document.getElementById('user-name').textContent = user.email;
-      if (user.picture) {
-        const avatar = document.getElementById('user-avatar');
-        avatar.src = user.picture;
-        avatar.style.display = 'block';
-      }
-      loadCourses();
-    } else { showLogin(error); }
-  } catch { showLogin(error); }
-}
-
-function showLogin(error) {
-  document.getElementById('login-page').style.display = 'flex';
-  document.getElementById('main-app').style.display = 'none';
-  document.getElementById('user-bar').style.display = 'none';
-  if (error) {
-    const errEl = document.getElementById('login-error');
-    const msgs = { unauthorized:'您的帳號沒有存取權限', auth_failed:'登入失敗，請再試一次', token_failed:'驗證失敗，請再試一次' };
-    errEl.textContent = msgs[error] || '登入時發生錯誤';
-    errEl.style.display = 'block';
-  }
-}
-
 
 checkAuth();
 </script>
-</div>
 </body>
 </html>
