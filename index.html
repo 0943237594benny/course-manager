@@ -237,6 +237,9 @@
   .btn-primary { background: var(--text); color: var(--bg); }
   .btn-danger { background: var(--red-bg); color: var(--red); }
   .btn-ghost { background: var(--bg3); color: var(--text2); }
+  .combo-wrap { position: relative; }
+  .combo-wrap select, .combo-wrap input { width: 100%; }
+  .combo-back { font-size: 11px; color: var(--text2); cursor: pointer; margin-top: 4px; display: none; text-align: right; }
 
   /* DETAIL SHEET */
   .detail-row { display: flex; gap: 10px; margin-bottom: 12px; align-items: flex-start; }
@@ -325,34 +328,46 @@
     <input type="hidden" id="f-id">
     <div class="form-group">
       <label class="form-label">標籤（你的身份）</label>
-      <select id="f-tag">
-        <option value="授課">授課（教官）</option>
-        <option value="複訓">複訓（學員複訓）</option>
-        <option value="受訓">受訓（學員初訓）</option>
-        <option value="行政">行政（會議/勤務）</option>
-      </select>
+      <div class="combo-wrap">
+        <select id="f-tag-select" onchange="comboSelect('f-tag','f-tag-select')">
+          <option value="授課-教官">授課-教官（主教官）</option>
+          <option value="授課-助教">授課-助教（助教）</option>
+          <option value="訓練">訓練（受訓/複訓）</option>
+          <option value="其他">其他（行政/會議）</option>
+          <option value="__custom__">＋ 自訂...</option>
+        </select>
+        <input type="text" id="f-tag" style="display:none" placeholder="輸入自訂標籤">
+      </div>
     </div>
     <div class="form-row">
       <div class="form-group">
         <label class="form-label">單位</label>
-        <select id="f-unit">
-          <option value="一大">一大</option>
-          <option value="TEMTA">TEMTA</option>
-          <option value="國安局">國安局</option>
-          <option value="中正中隊">中正中隊</option>
-          <option value="其他">其他</option>
-        </select>
+        <div class="combo-wrap">
+          <select id="f-unit-select" onchange="comboSelect('f-unit','f-unit-select')">
+            <option value="一大">一大</option>
+            <option value="TEMTA">TEMTA</option>
+            <option value="國安局">國安局</option>
+            <option value="中正中隊">中正中隊</option>
+            <option value="__custom__">＋ 自訂...</option>
+          </select>
+          <input type="text" id="f-unit" style="display:none" placeholder="輸入自訂單位">
+        </div>
       </div>
       <div class="form-group">
         <label class="form-label">課程類型</label>
-        <select id="f-type">
-          <option value="義消BLS">義消BLS</option>
-          <option value="EMT-1">EMT-1</option>
-          <option value="EMT-1+">EMT-1+</option>
-          <option value="防災士">防災士</option>
-          <option value="T-CERT">T-CERT</option>
-          <option value="其他">其他</option>
-        </select>
+        <div class="combo-wrap">
+          <select id="f-type-select" onchange="comboSelect('f-type','f-type-select')">
+            <option value="義消BLS">義消BLS</option>
+            <option value="EMT-1">EMT-1</option>
+            <option value="EMT-1+">EMT-1+</option>
+            <option value="EMT-2+">EMT-2+</option>
+            <option value="防災士">防災士</option>
+            <option value="T-CERT">T-CERT</option>
+            <option value="管路管理">管路管理</option>
+            <option value="__custom__">＋ 自訂...</option>
+          </select>
+          <input type="text" id="f-type" style="display:none" placeholder="輸入自訂課程類型">
+        </div>
       </div>
     </div>
     <div class="form-group">
@@ -524,9 +539,9 @@ function switchTab(tab) {
 function openAdd() {
   document.getElementById('form-title').textContent = '新增課程';
   document.getElementById('f-id').value = '';
-  document.getElementById('f-tag').value = '授課';
-  document.getElementById('f-unit').value = '一大';
-  document.getElementById('f-type').value = '義消BLS';
+  setComboValue('f-tag','f-tag-select','授課-教官');
+  setComboValue('f-unit','f-unit-select','一大');
+  setComboValue('f-type','f-type-select','義消BLS');
   document.getElementById('f-date').value = new Date().toISOString().slice(0,10);
   document.getElementById('f-start').value = '';
   document.getElementById('f-end').value = '';
@@ -561,9 +576,9 @@ function openEdit(id) {
   document.getElementById('detail-overlay').classList.remove('open');
   document.getElementById('form-title').textContent = '編輯課程';
   document.getElementById('f-id').value = c.id;
-  document.getElementById('f-tag').value = c.tag;
-  document.getElementById('f-unit').value = c.unit;
-  document.getElementById('f-type').value = c.type;
+  setComboValue('f-tag','f-tag-select',c.tag);
+  setComboValue('f-unit','f-unit-select',c.unit);
+  setComboValue('f-type','f-type-select',c.type);
   document.getElementById('f-date').value = c.date;
   document.getElementById('f-start').value = c.startTime;
   document.getElementById('f-end').value = c.endTime;
@@ -577,9 +592,9 @@ function openEdit(id) {
 async function saveCourse() {
   const id = document.getElementById('f-id').value;
   const body = {
-    tag: document.getElementById('f-tag').value,
-    unit: document.getElementById('f-unit').value,
-    type: document.getElementById('f-type').value,
+    tag: getComboValue('f-tag','f-tag-select'),
+    unit: getComboValue('f-unit','f-unit-select'),
+    type: getComboValue('f-type','f-type-select'),
     date: document.getElementById('f-date').value,
     startTime: document.getElementById('f-start').value,
     endTime: document.getElementById('f-end').value,
@@ -606,6 +621,80 @@ async function deleteCourse(id) {
     closeSheet('detail-overlay');
     await loadCourses();
   } catch(e) { alert('刪除失敗，請重試'); }
+}
+
+function comboSelect(inputId, selectId) {
+  const sel = document.getElementById(selectId);
+  const inp = document.getElementById(inputId);
+  if (sel.value === '__custom__') {
+    sel.style.display = 'none';
+    inp.style.display = 'block';
+    inp.value = '';
+    inp.focus();
+    // 加入返回按鈕
+    let back = sel.nextElementSibling?.nextElementSibling;
+    if (!back || !back.classList.contains('combo-back')) {
+      back = document.createElement('div');
+      back.className = 'combo-back';
+      back.textContent = '← 返回選單';
+      back.style.display = 'block';
+      back.onclick = () => comboBack(inputId, selectId);
+      inp.after(back);
+    } else {
+      back.style.display = 'block';
+    }
+  } else {
+    inp.value = sel.value;
+  }
+}
+
+function comboBack(inputId, selectId) {
+  const sel = document.getElementById(selectId);
+  const inp = document.getElementById(inputId);
+  sel.style.display = 'block';
+  inp.style.display = 'none';
+  sel.value = sel.options[0].value;
+  inp.value = sel.options[0].value;
+  inp.nextElementSibling.style.display = 'none';
+}
+
+function getComboValue(inputId, selectId) {
+  const sel = document.getElementById(selectId);
+  const inp = document.getElementById(inputId);
+  if (inp.style.display === 'none') return sel.value;
+  return inp.value.trim();
+}
+
+function setComboValue(inputId, selectId, value) {
+  const sel = document.getElementById(selectId);
+  const inp = document.getElementById(inputId);
+  // 找是否有對應選項
+  const opt = Array.from(sel.options).find(o => o.value === value);
+  if (opt && opt.value !== '__custom__') {
+    sel.style.display = 'block';
+    inp.style.display = 'none';
+    sel.value = value;
+    inp.value = value;
+    // 隱藏返回按鈕
+    const back = inp.nextElementSibling;
+    if (back && back.classList.contains('combo-back')) back.style.display = 'none';
+  } else {
+    sel.style.display = 'none';
+    inp.style.display = 'block';
+    inp.value = value;
+    // 顯示返回按鈕
+    let back = inp.nextElementSibling;
+    if (!back || !back.classList.contains('combo-back')) {
+      back = document.createElement('div');
+      back.className = 'combo-back';
+      back.textContent = '← 返回選單';
+      back.style.display = 'block';
+      back.onclick = () => comboBack(inputId, selectId);
+      inp.after(back);
+    } else {
+      back.style.display = 'block';
+    }
+  }
 }
 
 function showError(msg) {
