@@ -62,19 +62,19 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--text
 .filter-dot{width:7px;height:7px;border-radius:50%}
 
 /* GRID */
-.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:1px;background:var(--border);border-radius:var(--r);overflow:hidden;margin-bottom:14px}
-.cal-dow{background:var(--bg2);padding:7px 0;text-align:center;font-size:10px;color:var(--text3);font-family:'DM Mono',monospace;letter-spacing:.05em}
-.cal-cell{background:var(--bg2);min-height:64px;padding:4px 3px;cursor:pointer;transition:background .12s;position:relative}
+.cal-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border);border-radius:var(--r);overflow:hidden;margin-bottom:14px}
+.cal-dow{background:var(--bg2);padding:9px 0;text-align:center;font-size:13px;color:var(--text3);font-family:'DM Mono',monospace;letter-spacing:.05em}
+.cal-cell{background:var(--bg2);min-height:90px;padding:6px 5px;cursor:pointer;transition:background .12s;position:relative}
 .cal-cell:hover{background:var(--bg3)}
-.cal-cell.today .cal-day{background:var(--text);color:var(--bg);border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-weight:600}
+.cal-cell.today .cal-day{background:var(--text);color:var(--bg);border-radius:50%;width:28px;height:28px;display:flex;align-items:center;justify-content:center;font-weight:600}
 .cal-cell.other-month .cal-day{color:var(--text3)}
-.cal-day{font-size:12px;color:var(--text2);margin-bottom:3px;width:22px;height:22px;display:flex;align-items:center;justify-content:center}
-.cal-events{display:flex;flex-direction:column;gap:2px}
-.cal-event-bar{font-size:9px;border-radius:3px;padding:1px 4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:500;line-height:1.4}
-.cal-event-bar.span-start{border-radius:3px 0 0 3px}
+.cal-day{font-size:15px;color:var(--text2);margin-bottom:4px;width:28px;height:28px;display:flex;align-items:center;justify-content:center}
+.cal-events{display:flex;flex-direction:column;gap:3px}
+.cal-event-bar{font-size:11px;border-radius:4px;padding:2px 6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:500;line-height:1.4}
+.cal-event-bar.span-start{border-radius:4px 0 0 4px}
 .cal-event-bar.span-mid{border-radius:0;margin:0 -1px}
-.cal-event-bar.span-end{border-radius:0 3px 3px 0}
-.cal-dot{width:5px;height:5px;border-radius:50%;display:inline-block;margin:1px}
+.cal-event-bar.span-end{border-radius:0 4px 4px 0}
+.cal-dot{width:6px;height:6px;border-radius:50%;display:inline-block;margin:1px}
 
 /* TAG COLORS */
 .tag-授課-教官{background:var(--red-bg);color:var(--red)}
@@ -462,10 +462,7 @@ function renderCalendar() {
   });
 
   const grid = document.getElementById('cal-grid');
-  const dows = ['日','一','二','三','四','五','六'];
-  let html = dows.map(d=>`<div class="cal-dow">${d}</div>`).join('');
-
-  // 建立每天的事件對應
+  // 3天一列，顯示當月所有天
   function getEventsForDay(date) {
     const ds = toDateStr(date);
     return filtered.filter(c => {
@@ -478,18 +475,31 @@ function renderCalendar() {
     return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
   }
 
-  // 渲染格子
-  const totalCells = Math.ceil((startDow + last.getDate()) / 7) * 7;
-  for (let i = 0; i < totalCells; i++) {
-    const dayOffset = i - startDow;
-    const date = new Date(y, m, 1 + dayOffset);
-    const isThisMonth = date.getMonth() === m;
+  const days3 = ['日','一','二'];
+  let html = days3.map(d=>`<div class="cal-dow">${d}</div>`).join('');
+
+  // 計算第一天是星期幾（0=日,1=一,...,6=六）
+  // 3天一列：每列3天，從月份第一天開始
+  // 先補齊到第一週起始（週日為起始）
+  // 找到月份第一天在3天grid中的起始位置
+  // 我們直接從1號開始，不補空格，改用簡單的日期列表
+  const totalDays = last.getDate();
+  // 補齊到3的倍數
+  const padEnd = (3 - (totalDays % 3)) % 3;
+
+  for (let day = 1; day <= totalDays + padEnd; day++) {
+    if (day > totalDays) {
+      html += `<div class="cal-cell other-month"><div class="cal-day"></div></div>`;
+      continue;
+    }
+    const date = new Date(y, m, day);
     const isToday = date.getTime() === today.getTime();
     const ds = toDateStr(date);
     const evs = getEventsForDay(date);
+    const dow = ['日','一','二','三','四','五','六'][date.getDay()];
 
     let evHtml = '';
-    evs.slice(0,3).forEach(c => {
+    evs.slice(0,2).forEach(c => {
       const color = getEventColor(c);
       const isStart = c.date === ds;
       const isEnd = (c.endDate || c.date) === ds;
@@ -498,10 +508,13 @@ function renderCalendar() {
       const label = isStart ? (c.title || `${c.tag||''} ${c.type||''}`.trim()) : '';
       evHtml += `<div class="cal-event-bar ${cls}" style="background:${color}22;color:${color};border-left:${isStart||!isSpan?`2px solid ${color}`:'none'}">${label}</div>`;
     });
-    if (evs.length > 3) evHtml += `<div style="font-size:9px;color:var(--text3);padding-left:3px">+${evs.length-3}</div>`;
+    if (evs.length > 2) evHtml += `<div style="font-size:11px;color:var(--text3);padding-left:4px">+${evs.length-2}</div>`;
 
-    html += `<div class="cal-cell${!isThisMonth?' other-month':''}${isToday?' today':''}" onclick="selectDay('${ds}')">
-      <div class="cal-day">${date.getDate()}</div>
+    html += `<div class="cal-cell${isToday?' today':''}" onclick="selectDay('${ds}')">
+      <div style="display:flex;align-items:center;gap:5px;margin-bottom:4px">
+        <div class="cal-day">${day}</div>
+        <div style="font-size:11px;color:var(--text3)">${dow}</div>
+      </div>
       <div class="cal-events">${evHtml}</div>
     </div>`;
   }
