@@ -120,10 +120,15 @@
     content: ''; position: absolute; left: 0; top: 0; bottom: 0;
     width: 3px; border-radius: 3px 0 0 3px;
   }
-  .card.tag-授課::before { background: var(--red); }
-  .card.tag-複訓::before { background: var(--blue); }
-  .card.tag-受訓::before { background: var(--green); }
-  .card.tag-行政::before { background: var(--amber); }
+  .card.tag-授課-教官::before { background: var(--red); }
+  .card.tag-授課-助教::before { background: #ff8c00; }
+  .card.tag-訓練::before { background: var(--blue); }
+  .card.tag-其他::before { background: var(--amber); }
+  .card.expired { opacity: 0.4; filter: grayscale(40%); }
+  .badge-授課-教官 { background: var(--red-bg); color: var(--red); }
+  .badge-授課-助教 { background: rgba(255,140,0,0.12); color: #ff8c00; }
+  .badge-訓練 { background: var(--blue-bg); color: var(--blue); }
+  .badge-其他 { background: var(--amber-bg); color: var(--amber); }
 
   .card-title { font-size: 14px; font-weight: 500; margin-bottom: 6px; padding-left: 2px; }
   .card-meta { display: flex; flex-wrap: wrap; gap: 8px; }
