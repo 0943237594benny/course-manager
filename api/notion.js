@@ -19,58 +19,42 @@ export default async function handler(req, res) {
   const { action, pageId } = req.query;
 
   try {
-    // 取得所有課程
     if (req.method === "GET" && action === "list") {
       const r = await fetch(`${NOTION_API}/databases/${DB_ID}/query`, {
         method: "POST",
         headers,
-        body: JSON.stringify({ sorts: [{ property: "日期", direction: "ascending" }] }),
+        body: JSON.stringify({ sorts: [{ property: "日期", direction: "ascending" }], page_size: 100 }),
       });
       const data = await r.json();
       const courses = (data.results || []).map(mapPage);
       return res.status(200).json(courses);
     }
 
-    // 新增課程
     if (req.method === "POST" && action === "create") {
-      const b = req.body;
       const r = await fetch(`${NOTION_API}/pages`, {
         method: "POST",
         headers,
-        body: JSON.stringify({
-          parent: { database_id: DB_ID },
-          properties: buildProps(b),
-        }),
+        body: JSON.stringify({ parent: { database_id: DB_ID }, properties: buildProps(req.body) }),
       });
       const data = await r.json();
       return res.status(200).json(mapPage(data));
     }
 
-    // 更新課程
     if (req.method === "PATCH" && action === "update" && pageId) {
-      const b = req.body;
       const r = await fetch(`${NOTION_API}/pages/${pageId}`, {
         method: "PATCH",
         headers,
-        body: JSON.stringify({ properties: buildProps(b) }),
+        body: JSON.stringify({ properties: buildProps(req.body) }),
       });
       const data = await r.json();
       return res.status(200).json(mapPage(data));
     }
 
-    // 刪除課程
     if (req.method === "DELETE" && action === "delete" && pageId) {
       await fetch(`${NOTION_API}/pages/${pageId}`, {
-        method: "PATCH",
-        headers,
+        method: "PATCH", headers,
         body: JSON.stringify({ archived: true }),
       });
-      return res.status(200).json({ success: true });
-    }
-
-    // 自訂選項加入下拉選單（儲存到備用頁面）
-    if (req.method === "POST" && action === "addOption") {
-      // 這裡只回傳成功，實際選單由前端 localStorage 或 App 狀態管理
       return res.status(200).json({ success: true });
     }
 
@@ -82,13 +66,17 @@ export default async function handler(req, res) {
 
 function mapPage(p) {
   const props = p.properties || {};
+  const dateStart = props["日期"]?.date?.start || "";
+  const dateEnd = props["日期"]?.date?.end || "";
   return {
     id: p.id,
     title: props["課程名稱"]?.title?.[0]?.plain_text || "",
     tag: props["標籤"]?.select?.name || "",
     unit: props["單位"]?.select?.name || "",
     type: props["課程類型"]?.select?.name || "",
-    date: props["日期"]?.date?.start || "",
+    category: props["類別"]?.select?.name || "課程",
+    date: dateStart,
+    endDate: dateEnd,
     startTime: props["開始時間"]?.rich_text?.[0]?.plain_text || "",
     endTime: props["結束時間"]?.rich_text?.[0]?.plain_text || "",
     location: props["地點"]?.rich_text?.[0]?.plain_text || "",
@@ -97,7 +85,7 @@ function mapPage(p) {
 }
 
 function buildProps(b) {
-  const title = `[${b.tag}/${b.unit}] ${b.type}`;
+  const title = b.title || (b.tag ? `[${b.tag}/${b.unit||''}] ${b.type||''}` : '未命名');
   const props = {
     課程名稱: { title: [{ text: { content: title } }] },
     開始時間: { rich_text: [{ text: { content: b.startTime || "" } }] },
@@ -105,10 +93,13 @@ function buildProps(b) {
     地點: { rich_text: [{ text: { content: b.location || "" } }] },
     備注: { rich_text: [{ text: { content: b.note || "" } }] },
   };
-  if (b.date) props["日期"] = { date: { start: b.date } };
-  // select 欄位：Notion API 會自動新增不存在的選項值
+  // 日期（支援跨日）
+  if (b.date) {
+    props["日期"] = { date: { start: b.date, end: b.endDate || null } };
+  }
   if (b.tag) props["標籤"] = { select: { name: b.tag } };
   if (b.unit) props["單位"] = { select: { name: b.unit } };
   if (b.type) props["課程類型"] = { select: { name: b.type } };
+  if (b.category) props["類別"] = { select: { name: b.category } };
   return props;
 }
