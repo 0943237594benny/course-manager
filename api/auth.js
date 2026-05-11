@@ -24,7 +24,7 @@ export default async function handler(req, res) {
       client_id: clientId,
       redirect_uri: redirectUri,
       response_type: "code",
-      scope: "openid email profile https://www.googleapis.com/auth/gmail.readonly",
+      scope: "openid email profile",
       access_type: "offline",
     });
     return res.redirect(`https://accounts.google.com/o/oauth2/v2/auth?${params}`);
