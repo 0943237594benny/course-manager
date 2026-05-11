@@ -289,6 +289,7 @@
 <div class="tabs">
   <div class="tab active" onclick="switchTab('schedule')">行程</div>
   <div class="tab" onclick="switchTab('stats')">統計</div>
+  <div class="tab" onclick="switchTab('gmail')">📧 掃描</div>
 </div>
 
 <div id="schedule" class="section active">
@@ -307,6 +308,14 @@
   <div id="unit-chart"></div>
   <div class="chart-label">課程類型分佈</div>
   <div id="type-chart"></div>
+</div>
+
+<div id="gmail" class="section">
+  <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:14px;">
+    <div style="font-size:12px; color:var(--text2); font-family:DM Mono,monospace; letter-spacing:.04em;">未讀信件</div>
+    <button onclick="scanGmail()" style="background:var(--text); color:var(--bg); border:none; border-radius:8px; padding:7px 14px; font-size:12px; font-weight:500; cursor:pointer;">掃描 Gmail</button>
+  </div>
+  <div id="gmail-list"><div class="empty"><div class="empty-icon">📧</div>點「掃描 Gmail」載入信件</div></div>
 </div>
 
 <!-- 新增/編輯 Sheet -->
@@ -471,7 +480,7 @@ function renderStats() {
 }
 
 function switchTab(tab) {
-  document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('active',['schedule','stats'][i]===tab));
+  document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('active',['schedule','stats','gmail'][i]===tab));
   document.querySelectorAll('.section').forEach(s=>s.classList.toggle('active',s.id===tab));
 }
 
@@ -601,6 +610,68 @@ function showLogin(error) {
     errEl.textContent = msgs[error] || '登入時發生錯誤';
     errEl.style.display = 'block';
   }
+}
+
+
+// Gmail 掃描功能
+async function scanGmail() {
+  const list = document.getElementById('gmail-list');
+  list.innerHTML = '<div class="loading"><div class="spinner"></div>掃描信件中...</div>';
+  try {
+    const r = await fetch('/api/gmail?action=list');
+    if (r.status === 401) {
+      list.innerHTML = '<div class="empty"><div class="empty-icon">🔑</div>請重新登入以授權 Gmail 存取</div>';
+      return;
+    }
+    const messages = await r.json();
+    if (!messages.length) {
+      list.innerHTML = '<div class="empty"><div class="empty-icon">📭</div>沒有未讀信件</div>';
+      return;
+    }
+    list.innerHTML = messages.map(m => `
+      <div class="card" style="cursor:default; margin-bottom:10px;">
+        <div style="display:flex; align-items:flex-start; gap:10px;">
+          <input type="checkbox" id="msg-${m.id}" value="${m.id}" style="margin-top:3px; width:16px; height:16px; flex-shrink:0; cursor:pointer;">
+          <label for="msg-${m.id}" style="cursor:pointer; flex:1;">
+            <div style="font-size:14px; font-weight:500; color:var(--text); margin-bottom:4px;">${m.subject}</div>
+            <div style="font-size:12px; color:var(--text2); font-family:DM Mono,monospace;">${m.from.split('<')[0].trim()}</div>
+            <div style="font-size:11px; color:var(--text3); margin-top:2px;">${new Date(m.date).toLocaleDateString('zh-TW')}</div>
+          </label>
+        </div>
+      </div>`).join('');
+    
+    // 加入匯入按鈕
+    list.innerHTML += `<button onclick="importSelected()" style="width:100%; padding:13px; background:var(--text); color:var(--bg); border:none; border-radius:12px; font-size:14px; font-weight:500; cursor:pointer; margin-top:6px;">分析選取的信件</button>`;
+  } catch(e) {
+    list.innerHTML = '<div class="empty"><div class="empty-icon">⚠️</div>掃描失敗，請重試</div>';
+  }
+}
+
+async function importSelected() {
+  const checkboxes = document.querySelectorAll('#gmail-list input[type=checkbox]:checked');
+  if (!checkboxes.length) { alert('請先勾選信件'); return; }
+  
+  const list = document.getElementById('gmail-list');
+  list.innerHTML = '<div class="loading"><div class="spinner"></div>AI 分析信件中...</div>';
+  
+  const results = [];
+  for (const cb of checkboxes) {
+    const r = await fetch(`/api/gmail?action=get&id=${cb.value}`);
+    const msg = await r.json();
+    results.push(msg);
+  }
+
+  // 顯示分析結果讓使用者確認
+  list.innerHTML = results.map((m, i) => `
+    <div class="card" style="margin-bottom:12px;">
+      <div style="font-size:13px; font-weight:500; margin-bottom:8px;">📧 ${m.subject}</div>
+      <div style="font-size:12px; color:var(--text2); background:var(--bg3); border-radius:8px; padding:10px; white-space:pre-wrap; max-height:120px; overflow-y:auto;">${m.body.slice(0,300)}...</div>
+      <button onclick="sendPrompt('請幫我分析這封信件並建立課程行程：\n主旨：${m.subject.replace(/'/g,"\'")}\n寄件者：${m.from.replace(/'/g,"\'")}\n內容：${m.body.slice(0,500).replace(/'/g,"\'").replace(/
+/g,' ')}')" 
+        style="width:100%; margin-top:10px; padding:10px; background:var(--red); color:#fff; border:none; border-radius:8px; font-size:13px; font-weight:500; cursor:pointer;">
+        讓 Claude 分析並建立行程
+      </button>
+    </div>`).join('');
 }
 
 checkAuth();
