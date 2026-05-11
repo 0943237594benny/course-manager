@@ -421,33 +421,70 @@ function fmtDate(d) {
   return `${dt.getMonth()+1}/${dt.getDate()}（${days[dt.getDay()]}）`;
 }
 
+let showExpired = false;
+
 function renderSchedule() {
   const list = document.getElementById('course-list');
   if (!courses.length) {
     list.innerHTML = '<div class="empty"><div class="empty-icon">📅</div>尚無課程行程</div>';
     return;
   }
+  const now = new Date();
   const sorted = [...courses].sort((a,b) => a.date.localeCompare(b.date));
-  const groups = {};
-  sorted.forEach(c => {
-    const ym = c.date.slice(0,7);
-    if (!groups[ym]) groups[ym] = [];
-    groups[ym].push(c);
-  });
-  list.innerHTML = Object.entries(groups).map(([ym, cs]) => {
-    const [y,m] = ym.split('-');
-    return `<div class="month-label">${y} 年 ${parseInt(m)} 月</div>` +
-      cs.map(c => `
-        <div class="card tag-${c.tag}" onclick="openDetail('${c.id}')">
-          <div class="card-title">[${c.tag}/${c.unit}] ${c.type}</div>
-          <div class="card-meta">
-            <span>📅 ${fmtDate(c.date)}</span>
-            ${c.startTime ? `<span>🕐 ${c.startTime}–${c.endTime}</span>` : ''}
-            ${c.location ? `<span>📍 ${c.location}</span>` : ''}
-          </div>
-          <span class="badge badge-${c.tag}">${c.tag}</span>
-        </div>`).join('');
-  }).join('');
+  const active = sorted.filter(c => new Date(c.date + 'T23:59:59') >= now);
+  const expired = sorted.filter(c => new Date(c.date + 'T23:59:59') < now);
+
+  let html = '';
+
+  if (active.length) {
+    const groups = {};
+    active.forEach(c => {
+      const ym = c.date.slice(0,7);
+      if (!groups[ym]) groups[ym] = [];
+      groups[ym].push(c);
+    });
+    html += Object.entries(groups).map(([ym, cs]) => {
+      const [y,m] = ym.split('-');
+      return `<div class="month-label">${y} 年 ${parseInt(m)} 月</div>` +
+        cs.map(c => cardHTML(c, false)).join('');
+    }).join('');
+  } else {
+    html += '<div class="empty" style="padding:24px 0"><div class="empty-icon">📅</div>目前沒有即將到來的行程</div>';
+  }
+
+  if (expired.length) {
+    html += `
+    <div style="margin-top:16px;">
+      <button onclick="toggleExpired()" style="width:100%;display:flex;align-items:center;justify-content:space-between;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:12px 16px;cursor:pointer;color:var(--text2);font-size:13px;font-family:'Noto Sans TC',sans-serif;">
+        <span>⏰ 已過期行程（${expired.length} 筆）</span>
+        <span id="expired-arrow" style="transition:transform .2s">${showExpired ? '▲' : '▼'}</span>
+      </button>
+      <div id="expired-list" style="display:${showExpired ? 'block' : 'none'};margin-top:8px;opacity:0.5;">
+        ${expired.map(c => cardHTML(c, true)).join('')}
+      </div>
+    </div>`;
+  }
+
+  list.innerHTML = html;
+}
+
+function cardHTML(c, isExpired) {
+  return `
+  <div class="card tag-${c.tag}${isExpired ? ' expired' : ''}" onclick="openDetail('${c.id}')">
+    <div class="card-title">[${c.tag}/${c.unit}] ${c.type}</div>
+    <div class="card-meta">
+      <span>📅 ${fmtDate(c.date)}</span>
+      ${c.startTime ? `<span>🕐 ${c.startTime}&ndash;${c.endTime}</span>` : ''}
+      ${c.location ? `<span>📍 ${c.location}</span>` : ''}
+    </div>
+    <span class="badge badge-${c.tag}">${c.tag}</span>
+  </div>`;
+}
+
+function toggleExpired() {
+  showExpired = !showExpired;
+  document.getElementById('expired-list').style.display = showExpired ? 'block' : 'none';
+  document.getElementById('expired-arrow').textContent = showExpired ? '▲' : '▼';
 }
 
 function renderStats() {
