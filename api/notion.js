@@ -68,6 +68,12 @@ export default async function handler(req, res) {
       return res.status(200).json({ success: true });
     }
 
+    // 自訂選項加入下拉選單（儲存到備用頁面）
+    if (req.method === "POST" && action === "addOption") {
+      // 這裡只回傳成功，實際選單由前端 localStorage 或 App 狀態管理
+      return res.status(200).json({ success: true });
+    }
+
     return res.status(400).json({ error: "Unknown action" });
   } catch (e) {
     return res.status(500).json({ error: e.message });
@@ -101,7 +107,6 @@ function buildProps(b) {
     備注: { rich_text: [{ text: { content: b.note || "" } }] },
   };
   if (b.date) props["日期"] = { date: { start: b.date } };
-  if (b.hours) props["授課時數"] = { number: parseFloat(b.hours) };
   // select 欄位：Notion API 會自動新增不存在的選項值
   if (b.tag) props["標籤"] = { select: { name: b.tag } };
   if (b.unit) props["單位"] = { select: { name: b.unit } };
