@@ -329,7 +329,7 @@
     <div class="form-group">
       <label class="form-label">標籤（你的身份）</label>
       <div class="combo-wrap">
-        <select id="f-tag-select" onchange="comboSelect('f-tag','f-tag-select')">
+        <select id="f-tag-select" onchange="comboSelect('f-tag','f-tag-select'); toggleUnitField()">
           <option value="授課-教官">授課-教官（主教官）</option>
           <option value="授課-助教">授課-助教（助教）</option>
           <option value="訓練">訓練（受訓/複訓）</option>
@@ -340,14 +340,13 @@
       </div>
     </div>
     <div class="form-row">
-      <div class="form-group">
+      <div class="form-group" id="unit-group">
         <label class="form-label">單位</label>
         <div class="combo-wrap">
           <select id="f-unit-select" onchange="comboSelect('f-unit','f-unit-select')">
-            <option value="一大">一大</option>
             <option value="TEMTA">TEMTA</option>
-            <option value="國安局">國安局</option>
-            <option value="中正中隊">中正中隊</option>
+            <option value="公寓大廈">公寓大廈</option>
+            <option value="一大">一大</option>
             <option value="__custom__">＋ 自訂...</option>
           </select>
           <input type="text" id="f-unit" style="display:none" placeholder="輸入自訂單位">
@@ -357,13 +356,12 @@
         <label class="form-label">課程類型</label>
         <div class="combo-wrap">
           <select id="f-type-select" onchange="comboSelect('f-type','f-type-select')">
-            <option value="義消BLS">義消BLS</option>
-            <option value="EMT-1">EMT-1</option>
-            <option value="EMT-1+">EMT-1+</option>
-            <option value="EMT-2+">EMT-2+</option>
-            <option value="防災士">防災士</option>
-            <option value="T-CERT">T-CERT</option>
-            <option value="管路管理">管路管理</option>
+            <option value="T1">T1</option>
+            <option value="T1+">T1+</option>
+            <option value="T2">T2</option>
+            <option value="T2+">T2+</option>
+            <option value="TP">TP</option>
+            <option value="TP+">TP+</option>
             <option value="__custom__">＋ 自訂...</option>
           </select>
           <input type="text" id="f-type" style="display:none" placeholder="輸入自訂課程類型">
@@ -623,6 +621,45 @@ async function deleteCourse(id) {
   } catch(e) { alert('刪除失敗，請重試'); }
 }
 
+function toggleUnitField() {
+  const tag = getComboValue('f-tag', 'f-tag-select');
+  const unitGroup = document.getElementById('unit-group');
+  if (tag === '訓練' || tag === '其他') {
+    unitGroup.style.display = 'none';
+    document.getElementById('f-unit').value = '';
+    document.getElementById('f-unit-select').value = '';
+  } else {
+    unitGroup.style.display = 'block';
+  }
+}
+
+async function addToDropdown(inputId, selectId) {
+  const inp = document.getElementById(inputId);
+  const sel = document.getElementById(selectId);
+  const value = inp.value.trim();
+  if (!value) return;
+
+  // 儲存到 Notion 設定頁面
+  try {
+    await fetch(`${API}?action=addOption`, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ field: inputId, value })
+    });
+  } catch(e) {}
+
+  // 加入下拉選單
+  const opt = document.createElement('option');
+  opt.value = value;
+  opt.textContent = value;
+  sel.insertBefore(opt, sel.lastElementChild); // 插入到「自訂」前面
+
+  // 切換回下拉模式
+  comboBack(inputId, selectId);
+  sel.value = value;
+  inp.value = value;
+}
+
 function comboSelect(inputId, selectId) {
   const sel = document.getElementById(selectId);
   const inp = document.getElementById(inputId);
@@ -639,9 +676,23 @@ function comboSelect(inputId, selectId) {
       back.textContent = '← 返回選單';
       back.style.display = 'block';
       back.onclick = () => comboBack(inputId, selectId);
-      inp.after(back);
+      // 加入「加入選單」按鈕
+    let addBtn = inp.nextElementSibling?.nextElementSibling;
+    if (!addBtn || !addBtn.classList.contains('combo-add')) {
+      addBtn = document.createElement('div');
+      addBtn.className = 'combo-back combo-add';
+      addBtn.style.color = 'var(--blue)';
+      addBtn.textContent = '＋ 加入選單';
+      addBtn.onclick = () => addToDropdown(inputId, selectId);
+      back.after(addBtn);
+    } else {
+      addBtn.style.display = 'block';
+    }
+    inp.after(back);
     } else {
       back.style.display = 'block';
+      let addBtn = inp.nextElementSibling?.nextElementSibling;
+      if (addBtn && addBtn.classList.contains('combo-add')) addBtn.style.display = 'block';
     }
   } else {
     inp.value = sel.value;
