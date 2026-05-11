@@ -95,9 +95,6 @@ function buildProps(b) {
   const title = `[${b.tag}/${b.unit}] ${b.type}`;
   const props = {
     課程名稱: { title: [{ text: { content: title } }] },
-    標籤: { select: { name: b.tag } },
-    單位: { select: { name: b.unit } },
-    課程類型: { select: { name: b.type } },
     開始時間: { rich_text: [{ text: { content: b.startTime || "" } }] },
     結束時間: { rich_text: [{ text: { content: b.endTime || "" } }] },
     地點: { rich_text: [{ text: { content: b.location || "" } }] },
@@ -105,5 +102,9 @@ function buildProps(b) {
   };
   if (b.date) props["日期"] = { date: { start: b.date } };
   if (b.hours) props["授課時數"] = { number: parseFloat(b.hours) };
+  // select 欄位：Notion API 會自動新增不存在的選項值
+  if (b.tag) props["標籤"] = { select: { name: b.tag } };
+  if (b.unit) props["單位"] = { select: { name: b.unit } };
+  if (b.type) props["課程類型"] = { select: { name: b.type } };
   return props;
 }
