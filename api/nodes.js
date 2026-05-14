@@ -19,35 +19,34 @@ export default async function handler(req, res) {
   const { action, pageId, projectId } = req.query;
 
   try {
-    // 取得某專案的所有節點
     if (req.method === "GET" && action === "list") {
-      const filterBody = projectId
-        ? {
-            filter: {
-              property: "專案ID",
-              rich_text: { equals: projectId }
-            },
-            sorts: [{ property: "截止日期", direction: "ascending" }]
-          }
-        : { sorts: [{ property: "截止日期", direction: "ascending" }] };
-
+      const body = {
+        sorts: [{ property: "截止日期", direction: "ascending" }],
+        page_size: 100
+      };
+      if (projectId) {
+        body.filter = {
+          property: "專案ID",
+          rich_text: { equals: projectId }
+        };
+      }
       const r = await fetch(`${NOTION_API}/databases/${NODE_DB_ID}/query`, {
         method: "POST", headers,
-        body: JSON.stringify(filterBody),
+        body: JSON.stringify(body),
       });
       const data = await r.json();
       if (data.object === 'error') return res.status(400).json({ error: data.message });
       return res.status(200).json((data.results || []).map(mapNode));
     }
 
-    // 新增節點
     if (req.method === "POST" && action === "create") {
       const b = req.body;
+      const props = buildNodeProps(b);
       const r = await fetch(`${NOTION_API}/pages`, {
         method: "POST", headers,
         body: JSON.stringify({
           parent: { database_id: NODE_DB_ID },
-          properties: buildNodeProps(b)
+          properties: props
         }),
       });
       const data = await r.json();
@@ -55,7 +54,6 @@ export default async function handler(req, res) {
       return res.status(200).json(mapNode(data));
     }
 
-    // 更新節點
     if (req.method === "PATCH" && action === "update" && pageId) {
       const r = await fetch(`${NOTION_API}/pages/${pageId}`, {
         method: "PATCH", headers,
@@ -66,7 +64,6 @@ export default async function handler(req, res) {
       return res.status(200).json(mapNode(data));
     }
 
-    // 刪除節點
     if (req.method === "DELETE" && action === "delete" && pageId) {
       await fetch(`${NOTION_API}/pages/${pageId}`, {
         method: "PATCH", headers,
@@ -95,8 +92,8 @@ function mapNode(p) {
 
 function buildNodeProps(b) {
   const props = {};
-  if (b.name) {
-    props["節點名稱"] = { title: [{ text: { content: b.name } }] };
+  if (b.name !== undefined) {
+    props["節點名稱"] = { title: [{ text: { content: b.name || "" } }] };
   }
   if (b.note !== undefined) {
     props["備注"] = { rich_text: [{ text: { content: b.note || "" } }] };
@@ -107,8 +104,8 @@ function buildNodeProps(b) {
   if (typeof b.done === "boolean") {
     props["完成"] = { checkbox: b.done };
   }
-  if (b.projectId) {
-    props["專案ID"] = { rich_text: [{ text: { content: b.projectId } }] };
+  if (b.projectId !== undefined) {
+    props["專案ID"] = { rich_text: [{ text: { content: b.projectId || "" } }] };
   }
   return props;
 }
