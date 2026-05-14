@@ -212,7 +212,10 @@ textarea{height:72px;resize:none}
   </div>
   <div style="display:flex;gap:8px;align-items:center">
     <button class="add-btn" style="width:auto;border-radius:16px;padding:0 12px;font-size:12px;font-weight:500;background:var(--bg2);color:var(--text2);border:1px solid var(--border)" onclick="openQuickInput()">✦ 快速輸入</button>
+    <div style="display:flex;gap:8px">
+    <button class="add-btn" style="background:var(--bg2);border:1px solid var(--border);color:var(--text2)" onclick="openQuickInput()" title="快速輸入">⚡</button>
     <button class="add-btn" onclick="openAdd()">＋</button>
+  </div>
   </div>
 </div>
 
@@ -413,6 +416,126 @@ textarea{height:72px;resize:none}
     </div>
   </div>
 </div>
+
+<!-- 快速輸入 Sheet -->
+<div class="overlay" id="quick-overlay" onclick="closeOverlay(event,'quick-overlay')">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title">⚡ 快速輸入</div>
+    
+    <div class="form-group">
+      <label class="form-label">貼上課程資訊（可選）</label>
+      <textarea id="q-text" placeholder="例：5/23 下午 TEMTA T1+ 士林中正A教室&#10;或直接選取下方標籤後送出" style="height:90px"></textarea>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">標籤</label>
+      <div style="display:flex;flex-wrap:wrap;gap:6px" id="q-tag-btns">
+        <button class="q-btn q-tag active" data-val="授課-教官" onclick="selectQ('tag',this)" style="border-color:var(--red);color:var(--red)">授課-教官</button>
+        <button class="q-btn q-tag" data-val="授課-助教" onclick="selectQ('tag',this)" style="color:var(--orange)">授課-助教</button>
+        <button class="q-btn q-tag" data-val="訓練" onclick="selectQ('tag',this)" style="color:var(--blue)">訓練</button>
+        <button class="q-btn q-tag" data-val="其他" onclick="selectQ('tag',this)" style="color:var(--amber)">其他</button>
+      </div>
+    </div>
+
+    <div class="form-group" id="q-unit-wrap">
+      <label class="form-label">單位</label>
+      <div style="display:flex;flex-wrap:wrap;gap:6px">
+        <button class="q-btn q-unit active" data-val="TEMTA" onclick="selectQ('unit',this)">TEMTA</button>
+        <button class="q-btn q-unit" data-val="公寓大廈" onclick="selectQ('unit',this)">公寓大廈</button>
+        <button class="q-btn q-unit" data-val="一大" onclick="selectQ('unit',this)">一大</button>
+        <button class="q-btn q-unit" data-val="後指部" onclick="selectQ('unit',this)">後指部</button>
+        <button class="q-btn q-unit" data-val="EOC" onclick="selectQ('unit',this)">EOC</button>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">課程類型</label>
+      <div style="display:flex;flex-wrap:wrap;gap:6px">
+        <button class="q-btn q-type active" data-val="T1" onclick="selectQ('type',this)">T1</button>
+        <button class="q-btn q-type" data-val="T1+" onclick="selectQ('type',this)">T1+</button>
+        <button class="q-btn q-type" data-val="T2" onclick="selectQ('type',this)">T2</button>
+        <button class="q-btn q-type" data-val="T2+" onclick="selectQ('type',this)">T2+</button>
+        <button class="q-btn q-type" data-val="TP" onclick="selectQ('type',this)">TP</button>
+        <button class="q-btn q-type" data-val="TP+" onclick="selectQ('type',this)">TP+</button>
+        <button class="q-btn q-type" data-val="服勤人員" onclick="selectQ('type',this)">服勤人員</button>
+        <button class="q-btn q-type" data-val="民眾版BLS" onclick="selectQ('type',this)">民眾版BLS</button>
+        <button class="q-btn q-type" data-val="EOC民眾版" onclick="selectQ('type',this)">EOC民眾版</button>
+        <button class="q-btn q-type" data-val="防災士" onclick="selectQ('type',this)">防災士</button>
+        <button class="q-btn q-type" data-val="義消BLS" onclick="selectQ('type',this)">義消BLS</button>
+        <button class="q-btn q-type" data-val="EMT-1" onclick="selectQ('type',this)">EMT-1</button>
+        <button class="q-btn q-type" data-val="EMT-1+" onclick="selectQ('type',this)">EMT-1+</button>
+        <button class="q-btn q-type" data-val="EMT-2+" onclick="selectQ('type',this)">EMT-2+</button>
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-ghost" onclick="closeSheet('quick-overlay')">取消</button>
+      <button class="btn btn-primary" onclick="analyzeQuick()">分析並填入表單</button>
+    </div>
+  </div>
+</div>
+
+<!-- 專案節點 Sheet -->
+<div class="overlay" id="project-detail-overlay" onclick="closeOverlay(event,'project-detail-overlay')">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div id="project-detail-content"></div>
+  </div>
+</div>
+
+<!-- 新增節點 Sheet -->
+<div class="overlay" id="node-overlay" onclick="closeOverlay(event,'node-overlay')">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title">新增節點</div>
+    <input type="hidden" id="node-project-id">
+    <div class="form-group">
+      <label class="form-label">節點名稱</label>
+      <input type="text" id="node-name" placeholder="例：初稿完成">
+    </div>
+    <div class="form-group">
+      <label class="form-label">截止日期</label>
+      <div id="node-cal-wrap"></div>
+      <input type="hidden" id="node-date">
+      <div id="node-date-display" style="font-size:13px;color:var(--text2);margin-top:6px;font-family:'DM Mono',monospace"></div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">備注</label>
+      <input type="text" id="node-note" placeholder="備注（選填）">
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-ghost" onclick="closeSheet('node-overlay')">取消</button>
+      <button class="btn btn-primary" onclick="saveNode()">新增</button>
+    </div>
+  </div>
+</div>
+
+<style>
+.q-btn{padding:6px 12px;border-radius:20px;border:1px solid var(--border);background:var(--bg3);color:var(--text2);font-size:12px;cursor:pointer;font-family:'Noto Sans TC',sans-serif;transition:all .15s}
+.q-btn.active{border-color:currentColor;background:rgba(255,255,255,0.05)}
+/* 月曆選擇器 */
+.mini-cal{width:100%}
+.mini-cal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.mini-cal-title{font-size:13px;font-weight:500;font-family:'DM Mono',monospace}
+.mini-cal-nav{width:28px;height:28px;background:var(--bg3);border:1px solid var(--border);border-radius:6px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text2);font-size:14px}
+.mini-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px}
+.mini-dow{text-align:center;font-size:10px;color:var(--text3);padding:4px 0;font-family:'DM Mono',monospace}
+.mini-day{text-align:center;font-size:12px;padding:6px 2px;border-radius:6px;cursor:pointer;color:var(--text2);transition:background .12s}
+.mini-day:hover{background:var(--bg3)}
+.mini-day.today{font-weight:600;color:var(--text)}
+.mini-day.selected{background:var(--text);color:var(--bg);font-weight:600}
+.mini-day.other{color:var(--text3)}
+/* 節點列表 */
+.node-item{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)}
+.node-item:last-child{border-bottom:none}
+.node-check{width:20px;height:20px;border-radius:50%;border:2px solid var(--border);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s}
+.node-check.done{background:var(--green);border-color:var(--green)}
+.node-info{flex:1}
+.node-name{font-size:13px;font-weight:500}
+.node-name.done{text-decoration:line-through;color:var(--text2)}
+.node-date{font-size:11px;color:var(--text2);font-family:'DM Mono',monospace;margin-top:2px}
+</style>
 
 <script>
 const API = '/api/notion';
@@ -940,7 +1063,280 @@ function fillFormFromQuick(parsed) {
   document.getElementById('form-overlay').classList.add('open');
 }
 
+// ── QUICK INPUT ──
+let qSelected = { tag: '授課-教官', unit: 'TEMTA', type: 'T1' };
+
+function openQuickInput() {
+  // Reset
+  document.querySelectorAll('.q-tag').forEach((b,i)=>b.classList.toggle('active',i===0));
+  document.querySelectorAll('.q-unit').forEach((b,i)=>b.classList.toggle('active',i===0));
+  document.querySelectorAll('.q-type').forEach((b,i)=>b.classList.toggle('active',i===0));
+  qSelected = { tag:'授課-教官', unit:'TEMTA', type:'T1' };
+  document.getElementById('q-text').value = '';
+  document.getElementById('quick-overlay').classList.add('open');
+}
+
+function selectQ(field, btn) {
+  document.querySelectorAll(`.q-${field}`).forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  qSelected[field] = btn.dataset.val;
+  // 訓練時隱藏單位
+  if (field === 'tag') {
+    document.getElementById('q-unit-wrap').style.display =
+      (qSelected.tag === '訓練' || qSelected.tag === '其他') ? 'none' : 'block';
+  }
+}
+
+function parseTextInfo(text, callback) {
+  let date = '', startTime = '', endTime = '', location = '';
+  const now = new Date();
+  const y = now.getFullYear();
+
+  // 解析日期
+  const words = text.split(/\s+|，|,|
+/);
+  for (const w of words) {
+    const m1 = w.match(/^(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})$/);
+    const m2 = w.match(/^(\d{1,2})[\/\-](\d{1,2})$/);
+    if (m1) { date = m1[1]+'-'+m1[2].padStart(2,'0')+'-'+m1[3].padStart(2,'0'); break; }
+    if (m2) { date = y+'-'+m2[1].padStart(2,'0')+'-'+m2[2].padStart(2,'0'); break; }
+  }
+
+  // 解析時間
+  for (const w of words) {
+    const tm = w.match(/^(\d{1,2}):(\d{2})[-~](\d{1,2}):(\d{2})$/);
+    if (tm) {
+      startTime = tm[1].padStart(2,'0')+':'+tm[2];
+      endTime = tm[3].padStart(2,'0')+':'+tm[4];
+      break;
+    }
+  }
+  if (!startTime) {
+    if (text.indexOf('下午') >= 0) { startTime='13:30'; endTime='16:30'; }
+    else if (text.indexOf('上午') >= 0) { startTime='08:30'; endTime='12:00'; }
+    else if (text.indexOf('整天') >= 0 || text.indexOf('全天') >= 0) { startTime='08:30'; endTime='16:30'; }
+  }
+
+  // 解析地點
+  const locKw = ['教室','大隊','中心','學校','高中','大學','禮堂','辦公室','街','路'];
+  for (const w of words) {
+    if (locKw.some(k => w.indexOf(k) >= 0)) { location = w; break; }
+  }
+
+  callback(date, startTime, endTime, location);
+}
+
+function analyzeQuick() {
+  const text = document.getElementById('q-text').value;
+  let date='', startTime='', endTime='', location='';
+
+  if (text) {
+    // 解析日期：支援 M/D、MM/DD、YYYY/MM/DD、中文月日
+    const dateMatch = text.match(/(\d{1,4})[\/\-](\d{1,2})(?:[\/\-](\d{1,2}))?/);
+    if (dateMatch) {
+      const now = new Date();
+      const y = now.getFullYear();
+      if (dateMatch[3]) {
+        date = `${dateMatch[1].length===4?dateMatch[1]:y}-${dateMatch[2].padStart(2,'0')}-${dateMatch[3].padStart(2,'0')}`;
+      } else {
+        date = `${y}-${dateMatch[1].padStart(2,'0')}-${dateMatch[2].padStart(2,'0')}`;
+      }
+    }
+
+    // 解析時間：HH:MM-HH:MM 或 HH:MM~HH:MM
+    const timeMatch = text.match(/(\d{1,2})[:：](\d{2})\s*[-~～]\s*(\d{1,2})[:：](\d{2})/);
+    if (timeMatch) {
+      startTime = `${timeMatch[1].padStart(2,'0')}:${timeMatch[2]}`;
+      endTime = `${timeMatch[3].padStart(2,'0')}:${timeMatch[4]}`;
+    } else if (/下午|afternoon/i.test(text)) {
+      startTime = '13:30'; endTime = '16:30';
+    } else if (/上午|morning/i.test(text)) {
+      startTime = '08:30'; endTime = '12:00';
+    } else if (/整天|全天/i.test(text)) {
+      startTime = '08:30'; endTime = '16:30';
+    }
+
+    // 解析地點：在 at、地點、@、教室、大隊 等關鍵字後面
+    // 解析地點
+    const locKeywords = ['教室','大隊','中心','學校','高中','大學','禮堂','辦公室'];
+    const locMatch2 = text.split(/[\s,，]+/).find(w => locKeywords.some(k => w.includes(k)));
+    if (locMatch2) location = locMatch2.trim();
+  }
+
+  // 填入表單
+  closeSheet('quick-overlay');
+  openAdd();
+
+  // 等表單開啟後填值
+  setTimeout(() => {
+    document.getElementById('f-cat').value = '課程';
+    toggleCourseFields();
+    setComboValue('f-tag','f-tag-select', qSelected.tag);
+    setComboValue('f-unit','f-unit-select', qSelected.unit);
+    setComboValue('f-type','f-type-select', qSelected.type);
+    toggleUnitField();
+    if (date) document.getElementById('f-date').value = date;
+    if (startTime) document.getElementById('f-start').value = startTime;
+    if (endTime) document.getElementById('f-end').value = endTime;
+    if (location) document.getElementById('f-location').value = location;
+  }, 100);
+}
+
+// ── MINI CALENDAR ──
+let miniCalMonth = new Date();
+let selectedNodeDate = '';
+
+function renderMiniCal(containerId, onSelect) {
+  const y = miniCalMonth.getFullYear();
+  const m = miniCalMonth.getMonth();
+  const months = ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
+  const first = new Date(y,m,1);
+  const last = new Date(y,m+1,0);
+  const today = new Date(); today.setHours(0,0,0,0);
+
+  let html = `<div class="mini-cal">
+    <div class="mini-cal-header">
+      <div class="mini-cal-nav" onclick="miniCalNav(-1,'${containerId}')">‹</div>
+      <div class="mini-cal-title">${y}/${months[m]}</div>
+      <div class="mini-cal-nav" onclick="miniCalNav(1,'${containerId}')">›</div>
+    </div>
+    <div class="mini-grid">`;
+  ['日','一','二','三','四','五','六'].forEach(d=>{ html+=`<div class="mini-dow">${d}</div>`; });
+  const startDow = first.getDay();
+  for(let i=0;i<startDow;i++) html+=`<div class="mini-day other"></div>`;
+  for(let d=1;d<=last.getDate();d++){
+    const date=new Date(y,m,d);
+    const ds=`${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const isToday=date.getTime()===today.getTime();
+    const isSel=ds===selectedNodeDate;
+    html+=`<div class="mini-day${isToday?' today':''}${isSel?' selected':''}" onclick="selectNodeDate('${ds}','${containerId}')">${d}</div>`;
+  }
+  html+=`</div></div>`;
+  document.getElementById(containerId).innerHTML=html;
+}
+
+function miniCalNav(dir, containerId) {
+  miniCalMonth = new Date(miniCalMonth.getFullYear(), miniCalMonth.getMonth()+dir, 1);
+  renderMiniCal(containerId);
+}
+
+function selectNodeDate(ds, containerId) {
+  selectedNodeDate = ds;
+  document.getElementById('node-date').value = ds;
+  const [y,m,d] = ds.split('-').map(Number);
+  const days=['日','一','二','三','四','五','六'];
+  const dt = new Date(y,m-1,d);
+  document.getElementById('node-date-display').textContent = `已選：${m}/${d}（${days[dt.getDay()]}）`;
+  renderMiniCal(containerId);
+}
+
 // ── PROJECTS ──
+let projectNodes = {};
+
+async function loadNodes(projectId) {
+  try {
+    const r = await fetch(`/api/nodes?action=list&projectId=${projectId}`);
+    const nodes = await r.json();
+    projectNodes[projectId] = nodes;
+    return nodes;
+  } catch { return []; }
+}
+
+async function toggleNode(nodeId, currentDone, projectId) {
+  await fetch(`/api/nodes?action=update&pageId=${nodeId}`, {
+    method: 'PATCH', headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({ done: !currentDone })
+  });
+  projectNodes[projectId] = null;
+  openProjectDetail(projectId);
+}
+
+async function deleteNode(nodeId, projectId) {
+  if (!confirm('確定刪除這個節點？')) return;
+  await fetch(`/api/nodes?action=delete&pageId=${nodeId}`, { method: 'DELETE' });
+  projectNodes[projectId] = null;
+  openProjectDetail(projectId);
+}
+
+async function openProjectDetail(projectId) {
+  const p = courses.find(c => c.id === projectId);
+  if (!p) return;
+
+  document.getElementById('project-detail-content').innerHTML =
+    `<div class="sheet-title">${p.title || '未命名專案'}</div><div class="loading"><div class="spinner"></div>載入節點...</div>`;
+  document.getElementById('project-detail-overlay').classList.add('open');
+
+  const nodes = projectNodes[projectId] || await loadNodes(projectId);
+  const done = nodes.filter(n=>n.done).length;
+  const pct = nodes.length ? Math.round(done/nodes.length*100) : 0;
+
+  const now = new Date(); now.setHours(0,0,0,0);
+  const due = p.date ? new Date(p.date+'T00:00:00') : null;
+  const diffDays = due ? Math.ceil((due-now)/(1000*60*60*24)) : null;
+  const statusText = diffDays === null ? '' : diffDays < 0 ? `已逾期 ${Math.abs(diffDays)} 天` : diffDays === 0 ? '今天截止' : `還有 ${diffDays} 天`;
+  const statusColor = diffDays === null ? 'var(--purple)' : diffDays <= 0 ? 'var(--red)' : diffDays <= 7 ? 'var(--orange)' : 'var(--purple)';
+
+  document.getElementById('project-detail-content').innerHTML = `
+    <div class="sheet-title">${p.title || '未命名專案'}</div>
+    ${p.note ? `<div style="font-size:13px;color:var(--text2);margin-bottom:12px">${p.note}</div>` : ''}
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+      <div style="font-size:12px;color:var(--text2)">${done}/${nodes.length} 完成</div>
+      ${diffDays!==null?`<div style="font-size:12px;color:${statusColor};font-weight:500">${statusText}</div>`:''}
+    </div>
+    <div style="height:6px;background:var(--bg3);border-radius:3px;overflow:hidden;margin-bottom:16px">
+      <div style="height:100%;background:${statusColor};width:${pct}%;border-radius:3px;transition:width .3s"></div>
+    </div>
+    <div id="node-list">
+      ${nodes.length ? nodes.map(n => {
+        const nDue = n.date ? new Date(n.date+'T00:00:00') : null;
+        const nDiff = nDue ? Math.ceil((nDue-now)/(1000*60*60*24)) : null;
+        const nColor = n.done ? 'var(--green)' : nDiff !== null && nDiff < 0 ? 'var(--red)' : nDiff !== null && nDiff <= 3 ? 'var(--orange)' : 'var(--text2)';
+        return `<div class="node-item">
+          <div class="node-check${n.done?' done':''}" onclick="toggleNode('${n.id}',${n.done},'${projectId}')">
+            ${n.done ? '✓' : ''}
+          </div>
+          <div class="node-info">
+            <div class="node-name${n.done?' done':''}">${n.name}</div>
+            ${n.date ? `<div class="node-date" style="color:${nColor}">${fmtDate(n.date)}${nDiff!==null&&!n.done?` · ${nDiff<0?'已逾期':nDiff===0?'今天':'還有'+nDiff+'天'}`:''}${n.done?' · 已完成':''}</div>` : ''}
+          </div>
+          <div style="font-size:18px;color:var(--text3);cursor:pointer" onclick="deleteNode('${n.id}','${projectId}')">×</div>
+        </div>`;
+      }).join('') : '<div style="color:var(--text2);font-size:13px;padding:12px 0">尚無節點，新增第一個里程碑！</div>'}
+    </div>
+    <button onclick="openAddNode('${projectId}')" style="width:100%;margin-top:14px;padding:11px;background:var(--purple-bg);color:var(--purple);border:1px dashed var(--purple);border-radius:var(--r);font-size:13px;cursor:pointer;font-family:'Noto Sans TC',sans-serif">＋ 新增節點</button>
+    <div class="btn-row" style="margin-top:10px">
+      <button class="btn btn-danger" onclick="deleteCourse('${p.id}');closeSheet('project-detail-overlay')">刪除專案</button>
+      <button class="btn btn-ghost" onclick="closeSheet('project-detail-overlay')">關閉</button>
+    </div>`;
+}
+
+function openAddNode(projectId) {
+  selectedNodeDate = '';
+  miniCalMonth = new Date();
+  document.getElementById('node-project-id').value = projectId;
+  document.getElementById('node-name').value = '';
+  document.getElementById('node-date').value = '';
+  document.getElementById('node-date-display').textContent = '';
+  document.getElementById('node-note').value = '';
+  document.getElementById('node-overlay').classList.add('open');
+  renderMiniCal('node-cal-wrap');
+}
+
+async function saveNode() {
+  const name = document.getElementById('node-name').value.trim();
+  const date = document.getElementById('node-date').value;
+  const note = document.getElementById('node-note').value.trim();
+  const projectId = document.getElementById('node-project-id').value;
+  if (!name) { alert('請輸入節點名稱'); return; }
+  await fetch('/api/nodes?action=create', {
+    method: 'POST', headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({ name, date, note, projectId })
+  });
+  projectNodes[projectId] = null;
+  closeSheet('node-overlay');
+  openProjectDetail(projectId);
+}
+
 function renderProjects() {
   const list = document.getElementById('project-list');
   const projects = courses.filter(c => c.category === '專案').sort((a,b) => a.date.localeCompare(b.date));
@@ -960,7 +1356,7 @@ function renderProjects() {
     else if (diffDays === 0) { statusColor = 'var(--orange)'; statusText = '今天截止'; }
     else if (isDueSoon) { statusColor = 'var(--orange)'; }
     return `
-    <div class="card cat-專案" onclick="openDetail('${p.id}')" style="margin-bottom:10px">
+    <div class="card cat-專案" onclick="openProjectDetail('${p.id}')" style="margin-bottom:10px">
       <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px">
         <div style="flex:1">
           <div class="card-title">${p.title || '未命名專案'}</div>
