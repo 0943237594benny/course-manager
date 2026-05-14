@@ -1091,76 +1091,76 @@ function parseTextInfo(text, callback) {
   let date = '', startTime = '', endTime = '', location = '';
   const now = new Date();
   const y = now.getFullYear();
+  const parts = text.replace(/，/g, ' ').replace(/,/g, ' ').split(' ').filter(function(w){ return w.length > 0; });
 
   // 解析日期
-  const words = text.split(/\s+|，|,|
-/);
-  for (const w of words) {
-    const m1 = w.match(/^(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})$/);
-    const m2 = w.match(/^(\d{1,2})[\/\-](\d{1,2})$/);
-    if (m1) { date = m1[1]+'-'+m1[2].padStart(2,'0')+'-'+m1[3].padStart(2,'0'); break; }
-    if (m2) { date = y+'-'+m2[1].padStart(2,'0')+'-'+m2[2].padStart(2,'0'); break; }
+  for (let i = 0; i < parts.length; i++) {
+    const w = parts[i];
+    // YYYY/MM/DD 或 YYYY-MM-DD
+    if (w.length >= 8 && (w.indexOf('/') > 0 || w.indexOf('-') > 0)) {
+      const sep = w.indexOf('/') > 0 ? '/' : '-';
+      const p = w.split(sep);
+      if (p.length === 3 && p[0].length === 4) {
+        date = p[0] + '-' + p[1].padStart(2,'0') + '-' + p[2].padStart(2,'0');
+        break;
+      }
+    }
+    // M/D 或 MM/DD
+    if (w.indexOf('/') > 0 && w.indexOf('/') === w.lastIndexOf('/')) {
+      const p = w.split('/');
+      if (p.length === 2 && !isNaN(p[0]) && !isNaN(p[1])) {
+        date = y + '-' + p[0].padStart(2,'0') + '-' + p[1].padStart(2,'0');
+        break;
+      }
+    }
+    // M-D
+    if (w.indexOf('-') > 0 && w.indexOf('-') === w.lastIndexOf('-')) {
+      const p = w.split('-');
+      if (p.length === 2 && !isNaN(p[0]) && !isNaN(p[1]) && parseInt(p[0]) <= 12) {
+        date = y + '-' + p[0].padStart(2,'0') + '-' + p[1].padStart(2,'0');
+        break;
+      }
+    }
   }
 
-  // 解析時間
-  for (const w of words) {
-    const tm = w.match(/^(\d{1,2}):(\d{2})[-~](\d{1,2}):(\d{2})$/);
-    if (tm) {
-      startTime = tm[1].padStart(2,'0')+':'+tm[2];
-      endTime = tm[3].padStart(2,'0')+':'+tm[4];
-      break;
+  // 解析時間 HH:MM-HH:MM
+  for (let i = 0; i < parts.length; i++) {
+    const w = parts[i];
+    const dashIdx = w.indexOf('-');
+    if (dashIdx > 0) {
+      const left = w.substring(0, dashIdx);
+      const right = w.substring(dashIdx + 1);
+      if (left.indexOf(':') > 0 && right.indexOf(':') > 0) {
+        startTime = left.padStart(5, '0');
+        endTime = right;
+        break;
+      }
     }
   }
   if (!startTime) {
-    if (text.indexOf('下午') >= 0) { startTime='13:30'; endTime='16:30'; }
-    else if (text.indexOf('上午') >= 0) { startTime='08:30'; endTime='12:00'; }
-    else if (text.indexOf('整天') >= 0 || text.indexOf('全天') >= 0) { startTime='08:30'; endTime='16:30'; }
+    if (text.indexOf('下午') >= 0) { startTime = '13:30'; endTime = '16:30'; }
+    else if (text.indexOf('上午') >= 0) { startTime = '08:30'; endTime = '12:00'; }
+    else if (text.indexOf('整天') >= 0 || text.indexOf('全天') >= 0) { startTime = '08:30'; endTime = '16:30'; }
   }
 
   // 解析地點
   const locKw = ['教室','大隊','中心','學校','高中','大學','禮堂','辦公室','街','路'];
-  for (const w of words) {
-    if (locKw.some(k => w.indexOf(k) >= 0)) { location = w; break; }
+  for (let i = 0; i < parts.length; i++) {
+    for (let j = 0; j < locKw.length; j++) {
+      if (parts[i].indexOf(locKw[j]) >= 0) { location = parts[i]; break; }
+    }
+    if (location) break;
   }
 
   callback(date, startTime, endTime, location);
 }
-
 function analyzeQuick() {
   const text = document.getElementById('q-text').value;
   let date='', startTime='', endTime='', location='';
 
   if (text) {
     // 解析日期：支援 M/D、MM/DD、YYYY/MM/DD、中文月日
-    const dateMatch = text.match(/(\d{1,4})[\/\-](\d{1,2})(?:[\/\-](\d{1,2}))?/);
-    if (dateMatch) {
-      const now = new Date();
-      const y = now.getFullYear();
-      if (dateMatch[3]) {
-        date = `${dateMatch[1].length===4?dateMatch[1]:y}-${dateMatch[2].padStart(2,'0')}-${dateMatch[3].padStart(2,'0')}`;
-      } else {
-        date = `${y}-${dateMatch[1].padStart(2,'0')}-${dateMatch[2].padStart(2,'0')}`;
-      }
-    }
 
-    // 解析時間：HH:MM-HH:MM 或 HH:MM~HH:MM
-    const timeMatch = text.match(/(\d{1,2})[:：](\d{2})\s*[-~～]\s*(\d{1,2})[:：](\d{2})/);
-    if (timeMatch) {
-      startTime = `${timeMatch[1].padStart(2,'0')}:${timeMatch[2]}`;
-      endTime = `${timeMatch[3].padStart(2,'0')}:${timeMatch[4]}`;
-    } else if (/下午|afternoon/i.test(text)) {
-      startTime = '13:30'; endTime = '16:30';
-    } else if (/上午|morning/i.test(text)) {
-      startTime = '08:30'; endTime = '12:00';
-    } else if (/整天|全天/i.test(text)) {
-      startTime = '08:30'; endTime = '16:30';
-    }
-
-    // 解析地點：在 at、地點、@、教室、大隊 等關鍵字後面
-    // 解析地點
-    const locKeywords = ['教室','大隊','中心','學校','高中','大學','禮堂','辦公室'];
-    const locMatch2 = text.split(/[\s,，]+/).find(w => locKeywords.some(k => w.includes(k)));
-    if (locMatch2) location = locMatch2.trim();
   }
 
   // 填入表單
