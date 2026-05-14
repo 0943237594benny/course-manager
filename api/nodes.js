@@ -9,25 +9,35 @@ export default async function handler(req, res) {
 
   const key = process.env.NOTION_API_KEY;
   if (!key) return res.status(500).json({ error: "Missing NOTION_API_KEY" });
+
   const headers = {
     Authorization: `Bearer ${key}`,
     "Content-Type": "application/json",
     "Notion-Version": "2022-06-28",
   };
+
   const { action, pageId, projectId } = req.query;
 
   try {
     // 取得某專案的所有節點
     if (req.method === "GET" && action === "list") {
+      const filterBody = projectId
+        ? {
+            filter: {
+              property: "專案ID",
+              rich_text: { equals: projectId }
+            },
+            sorts: [{ property: "截止日期", direction: "ascending" }]
+          }
+        : { sorts: [{ property: "截止日期", direction: "ascending" }] };
+
       const r = await fetch(`${NOTION_API}/databases/${NODE_DB_ID}/query`, {
         method: "POST", headers,
-        body: JSON.stringify({
-          filter: projectId ? { property: "專案ID", rich_text: { equals: projectId } } : {},
-          sorts: [{ property: "截止日期", direction: "ascending" }]
-        }),
+        body: JSON.stringify(filterBody),
       });
       const data = await r.json();
-      return res.status(200).json((data.results||[]).map(mapNode));
+      if (data.object === 'error') return res.status(400).json({ error: data.message });
+      return res.status(200).json((data.results || []).map(mapNode));
     }
 
     // 新增節點
@@ -40,16 +50,20 @@ export default async function handler(req, res) {
           properties: buildNodeProps(b)
         }),
       });
-      return res.status(200).json(mapNode(await r.json()));
+      const data = await r.json();
+      if (data.object === 'error') return res.status(400).json({ error: data.message });
+      return res.status(200).json(mapNode(data));
     }
 
-    // 更新節點（含勾選完成）
+    // 更新節點
     if (req.method === "PATCH" && action === "update" && pageId) {
       const r = await fetch(`${NOTION_API}/pages/${pageId}`, {
         method: "PATCH", headers,
         body: JSON.stringify({ properties: buildNodeProps(req.body) }),
       });
-      return res.status(200).json(mapNode(await r.json()));
+      const data = await r.json();
+      if (data.object === 'error') return res.status(400).json({ error: data.message });
+      return res.status(200).json(mapNode(data));
     }
 
     // 刪除節點
@@ -80,12 +94,21 @@ function mapNode(p) {
 }
 
 function buildNodeProps(b) {
-  const props = {
-    節點名稱: { title: [{ text: { content: b.name || "" } }] },
-    備注: { rich_text: [{ text: { content: b.note || "" } }] },
-  };
-  if (b.date) props["截止日期"] = { date: { start: b.date } };
-  if (typeof b.done === "boolean") props["完成"] = { checkbox: b.done };
-  if (b.projectId) props["專案ID"] = { rich_text: [{ text: { content: b.projectId } }] };
+  const props = {};
+  if (b.name) {
+    props["節點名稱"] = { title: [{ text: { content: b.name } }] };
+  }
+  if (b.note !== undefined) {
+    props["備注"] = { rich_text: [{ text: { content: b.note || "" } }] };
+  }
+  if (b.date) {
+    props["截止日期"] = { date: { start: b.date } };
+  }
+  if (typeof b.done === "boolean") {
+    props["完成"] = { checkbox: b.done };
+  }
+  if (b.projectId) {
+    props["專案ID"] = { rich_text: [{ text: { content: b.projectId } }] };
+  }
   return props;
 }
