@@ -1234,15 +1234,21 @@ async function openProjectDetail(projectId) {
   const now = new Date(); now.setHours(0,0,0,0);
   const due = p.date ? new Date(p.date+'T00:00:00') : null;
   const diffDays = due ? Math.ceil((due-now)/(1000*60*60*24)) : null;
-  const statusText = diffDays === null ? '' : diffDays < 0 ? `已逾期 ${Math.abs(diffDays)} 天` : diffDays === 0 ? '今天截止' : `還有 ${diffDays} 天`;
-  const statusColor = diffDays === null ? 'var(--purple)' : diffDays <= 0 ? 'var(--red)' : diffDays <= 7 ? 'var(--orange)' : 'var(--purple)';
+  let statusText = '';
+  let statusColor = 'var(--purple)';
+  if (diffDays !== null) {
+    if (diffDays < 0) { statusColor = 'var(--red)'; statusText = `已逾期 ${Math.abs(diffDays)} 天`; }
+    else if (diffDays === 0) { statusColor = 'var(--orange)'; statusText = '今天截止'; }
+    else if (diffDays <= 7) { statusColor = 'var(--orange)'; statusText = `還有 ${diffDays} 天`; }
+    else { statusText = `還有 ${diffDays} 天`; }
+  }
 
   document.getElementById('project-detail-content').innerHTML = `
     <div class="sheet-title">${p.title || '未命名專案'}</div>
     ${p.note ? `<div style="font-size:13px;color:var(--text2);margin-bottom:12px">${p.note}</div>` : ''}
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
       <div style="font-size:12px;color:var(--text2)">${done}/${nodes.length} 完成</div>
-      ${diffDays!==null?`<div style="font-size:12px;color:${statusColor};font-weight:500">${statusText}</div>`:''}
+      ${statusText?`<div style="font-size:12px;color:${statusColor};font-weight:500">${statusText}</div>`:''}
     </div>
     <div style="height:6px;background:var(--bg3);border-radius:3px;overflow:hidden;margin-bottom:16px">
       <div style="height:100%;background:${statusColor};width:${pct}%;border-radius:3px;transition:width .3s"></div>
