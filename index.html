@@ -1232,7 +1232,8 @@ async function openProjectDetail(projectId) {
   const pct = nodes.length ? Math.round(done/nodes.length*100) : 0;
 
   const now = new Date(); now.setHours(0,0,0,0);
-  const due = p.date ? new Date(p.date+'T00:00:00') : null;
+  const dueDate = p.endDate || p.date;
+  const due = dueDate ? new Date(dueDate+'T00:00:00') : null;
   const diffDays = due ? Math.ceil((due-now)/(1000*60*60*24)) : null;
   let statusText = '';
   let statusColor = 'var(--purple)';
