@@ -404,8 +404,8 @@ textarea{height:72px;resize:none}
     <div class="sheet-title">⚡ 快速輸入</div>
     
     <div class="form-group">
-      <label class="form-label">貼上課程資訊（可選）</label>
-      <textarea id="q-text" placeholder="例：5/23 下午 TEMTA T1+ 士林中正A教室&#10;或直接選取下方標籤後送出" style="height:90px"></textarea>
+      <label class="form-label">預覽／補充資訊（可直接修改）</label>
+      <textarea id="q-text" placeholder="選取下方標籤後會自動填入&#10;可補充：日期、時間、地點等" style="height:80px;font-family:'DM Mono',monospace;font-size:13px"></textarea>
     </div>
 
     <div class="form-group">
@@ -935,13 +935,14 @@ function switchTab(tab){
 
 // ── QUICK INPUT ──
 function openQuickInput() {
-  // Reset
   document.querySelectorAll('.q-tag').forEach((b,i)=>b.classList.toggle('active',i===0));
   document.querySelectorAll('.q-unit').forEach((b,i)=>b.classList.toggle('active',i===0));
   document.querySelectorAll('.q-type').forEach((b,i)=>b.classList.toggle('active',i===0));
   qSelected = { tag:'授課-教官', unit:'TEMTA', type:'T1' };
-  document.getElementById('q-text').value = '';
+  document.getElementById('q-unit-wrap').style.display = 'block';
   document.getElementById('quick-overlay').classList.add('open');
+  // 初始化預覽
+  setTimeout(() => updateQPreview(), 50);
 }
 
 function handleQClick(event, field) {
@@ -954,11 +955,46 @@ function selectQ(field, btn) {
   document.querySelectorAll(`.q-${field}`).forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
   qSelected[field] = btn.dataset.val;
-  // 訓練時隱藏單位
   if (field === 'tag') {
     document.getElementById('q-unit-wrap').style.display =
       (qSelected.tag === '訓練' || qSelected.tag === '其他') ? 'none' : 'block';
   }
+  updateQPreview();
+}
+
+function updateQPreview() {
+  const tag = qSelected.tag || '';
+  const unit = qSelected.unit || '';
+  const type = qSelected.type || '';
+  const isTraining = (tag === '訓練' || tag === '其他');
+
+  // 取得目前文字框內容，保留日期/時間/地點等自行輸入的部分
+  const current = document.getElementById('q-text').value;
+
+  // 解析出非標籤/單位/類型的部分（日期、時間、地點等）
+  const lines = current.split('\n').filter(l => {
+    const l2 = l.trim();
+    if (!l2) return false;
+    // 過濾掉舊的標籤行（以 [ 開頭或包含已知標籤值）
+    if (l2.startsWith('[')) return false;
+    if (l2 === tag || l2 === unit || l2 === type) return false;
+    return true;
+  });
+
+  // 組合新的預覽文字
+  let preview = '';
+  if (isTraining) {
+    preview = `[${tag}] ${type}`;
+  } else {
+    preview = `[${tag}/${unit}] ${type}`;
+  }
+
+  // 如果有其他內容（日期、時間、地點），加在後面
+  if (lines.length > 0) {
+    preview += '\n' + lines.join('\n');
+  }
+
+  document.getElementById('q-text').value = preview;
 }
 
 function parseTextInfo(text, callback) {
