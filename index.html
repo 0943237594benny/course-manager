@@ -1324,7 +1324,8 @@ function renderProjects() {
     let diffDays = null;
     let isOverdue = false;
     if (p.date) {
-      const due = new Date(p.date + 'T00:00:00');
+      const dueDate2 = p.endDate || p.date;
+      const due = new Date(dueDate2 + 'T00:00:00');
       diffDays = Math.ceil((due - now) / (1000*60*60*24));
       isOverdue = diffDays < 0;
       if (isOverdue) { statusColor = 'var(--red)'; statusText = `已逾期 ${Math.abs(diffDays)} 天`; }
