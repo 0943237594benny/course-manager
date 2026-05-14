@@ -409,6 +409,17 @@ textarea{height:72px;resize:none}
     </div>
 
     <div class="form-group">
+      <label class="form-label">類別</label>
+      <div style="display:flex;flex-wrap:wrap;gap:6px" onclick="handleQCatClick(event)">
+        <button class="q-btn q-cat active" data-val="課程" style="color:var(--blue)">課程</button>
+        <button class="q-btn q-cat" data-val="生活" style="color:var(--green)">生活</button>
+        <button class="q-btn q-cat" data-val="專案" style="color:var(--purple)">專案</button>
+        <button class="q-btn q-cat" data-val="其他" style="color:var(--amber)">其他</button>
+      </div>
+    </div>
+
+    <div id="q-course-fields">
+    <div class="form-group">
       <label class="form-label">標籤</label>
       <div style="display:flex;flex-wrap:wrap;gap:6px" id="q-tag-btns" onclick="handleQClick(event,'tag')">
         <button class="q-btn q-tag active" data-val="授課-教官" style="border-color:var(--red);color:var(--red)">授課-教官</button>
@@ -448,6 +459,7 @@ textarea{height:72px;resize:none}
         <button class="q-btn q-type" data-val="EMT-2+">EMT-2+</button>
       </div>
     </div>
+    </div><!-- q-course-fields -->
 
     <div class="btn-row">
       <button class="btn btn-ghost" onclick="closeSheet('quick-overlay')">取消</button>
@@ -938,11 +950,23 @@ function openQuickInput() {
   document.querySelectorAll('.q-tag').forEach((b,i)=>b.classList.toggle('active',i===0));
   document.querySelectorAll('.q-unit').forEach((b,i)=>b.classList.toggle('active',i===0));
   document.querySelectorAll('.q-type').forEach((b,i)=>b.classList.toggle('active',i===0));
-  qSelected = { tag:'授課-教官', unit:'TEMTA', type:'T1' };
+  qSelected = { category:'課程', tag:'授課-教官', unit:'TEMTA', type:'T1' };
   document.getElementById('q-unit-wrap').style.display = 'block';
   document.getElementById('quick-overlay').classList.add('open');
   // 初始化預覽
   setTimeout(() => updateQPreview(), 50);
+}
+
+function handleQCatClick(event) {
+  const btn = event.target.closest('.q-btn');
+  if (!btn || !btn.dataset.val) return;
+  document.querySelectorAll('.q-cat').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  qSelected.category = btn.dataset.val;
+  // 只有課程類別才顯示標籤/單位/課程類型
+  const isCourse = btn.dataset.val === '課程';
+  document.getElementById('q-course-fields').style.display = isCourse ? 'block' : 'none';
+  updateQPreview();
 }
 
 function handleQClick(event, field) {
@@ -963,33 +987,30 @@ function selectQ(field, btn) {
 }
 
 function updateQPreview() {
+  const cat = qSelected.category || '課程';
   const tag = qSelected.tag || '';
   const unit = qSelected.unit || '';
   const type = qSelected.type || '';
   const isTraining = (tag === '訓練' || tag === '其他');
 
-  // 取得目前文字框內容，保留日期/時間/地點等自行輸入的部分
   const current = document.getElementById('q-text').value;
-
-  // 解析出非標籤/單位/類型的部分（日期、時間、地點等）
   const lines = current.split('\n').filter(l => {
     const l2 = l.trim();
     if (!l2) return false;
-    // 過濾掉舊的標籤行（以 [ 開頭或包含已知標籤值）
     if (l2.startsWith('[')) return false;
-    if (l2 === tag || l2 === unit || l2 === type) return false;
+    if (l2 === tag || l2 === unit || l2 === type || l2 === cat) return false;
     return true;
   });
 
-  // 組合新的預覽文字
   let preview = '';
-  if (isTraining) {
+  if (cat !== '課程') {
+    preview = `[${cat}]`;
+  } else if (isTraining) {
     preview = `[${tag}] ${type}`;
   } else {
     preview = `[${tag}/${unit}] ${type}`;
   }
 
-  // 如果有其他內容（日期、時間、地點），加在後面
   if (lines.length > 0) {
     preview += '\n' + lines.join('\n');
   }
@@ -1079,7 +1100,7 @@ function analyzeQuick() {
 
   // 等表單開啟後填值
   setTimeout(() => {
-    document.getElementById('f-cat').value = '課程';
+    document.getElementById('f-cat').value = qSelected.category || '課程';
     toggleCourseFields();
     setComboValue('f-tag','f-tag-select', qSelected.tag);
     setComboValue('f-unit','f-unit-select', qSelected.unit);
