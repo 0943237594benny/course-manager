@@ -1180,12 +1180,18 @@ function selectNodeDate(ds, containerId) {
 let projectNodes = {};
 
 async function loadNodes(projectId) {
+  const r = await fetch(`/api/nodes?action=list&projectId=${encodeURIComponent(projectId)}`);
+  const text = await r.text();
+  let nodes;
   try {
-    const r = await fetch(`/api/nodes?action=list&projectId=${projectId}`);
-    const nodes = await r.json();
-    projectNodes[projectId] = nodes;
-    return nodes;
-  } catch { return []; }
+    nodes = JSON.parse(text);
+  } catch(e) {
+    throw new Error('API 回應格式錯誤: ' + text.slice(0, 100));
+  }
+  if (nodes.error) throw new Error(nodes.error);
+  if (!Array.isArray(nodes)) throw new Error('非陣列回應: ' + text.slice(0, 100));
+  projectNodes[projectId] = nodes;
+  return nodes;
 }
 
 async function toggleNode(nodeId, currentDone, projectId) {
@@ -1212,7 +1218,16 @@ async function openProjectDetail(projectId) {
     `<div class="sheet-title">${p.title || '未命名專案'}</div><div class="loading"><div class="spinner"></div>載入節點...</div>`;
   document.getElementById('project-detail-overlay').classList.add('open');
 
-  const nodes = projectNodes[projectId] || await loadNodes(projectId);
+  let nodes = [];
+  try {
+    nodes = projectNodes[projectId] || await loadNodes(projectId);
+  } catch(e) {
+    document.getElementById('project-detail-content').innerHTML =
+      `<div class="sheet-title">${p.title || '未命名專案'}</div>
+       <div style="color:var(--red);font-size:13px;padding:12px 0">載入失敗：${e.message}</div>
+       <button class="btn btn-ghost" onclick="closeSheet('project-detail-overlay')" style="margin-top:10px">關閉</button>`;
+    return;
+  }
   const done = nodes.filter(n=>n.done).length;
   const pct = nodes.length ? Math.round(done/nodes.length*100) : 0;
 
