@@ -220,6 +220,7 @@ textarea{height:72px;resize:none}
 <div class="tabs">
   <div class="tab active" onclick="switchTab('calendar')">行事曆</div>
   <div class="tab" onclick="switchTab('schedule')">行程</div>
+  <div class="tab" onclick="switchTab('projects')">專案</div>
   <div class="tab" onclick="switchTab('stats')">統計</div>
 </div>
 
@@ -250,6 +251,14 @@ textarea{height:72px;resize:none}
 <div id="schedule" class="section">
   <div class="loading" id="sch-loading" style="display:none"><div class="spinner"></div>載入中...</div>
   <div id="course-list"></div>
+</div>
+
+<!-- PROJECTS TAB -->
+<div id="projects" class="section">
+  <div id="project-list"></div>
+  <div style="margin-top:12px">
+    <button onclick="openAddProject()" style="width:100%;padding:12px;background:var(--purple-bg);color:var(--purple);border:1px dashed var(--purple);border-radius:var(--r);font-size:13px;cursor:pointer;font-family:'Noto Sans TC',sans-serif;">＋ 新增專案</button>
+  </div>
 </div>
 
 <!-- STATS TAB -->
@@ -443,6 +452,7 @@ async function loadCourses() {
     renderCalendar();
     renderSchedule();
     renderStats();
+    renderProjects();
     document.getElementById('cal-loading').style.display = 'none';
     document.getElementById('cal-content').style.display = 'block';
   } catch(e) {
@@ -528,17 +538,27 @@ function renderCalendar() {
       const isEnd = (c.endDate || c.date) === ds;
       const isSpan = c.endDate && c.endDate !== c.date;
       let cls = isSpan ? (isStart ? 'span-start' : isEnd ? 'span-end' : 'span-mid') : '';
-      // 縮短標籤：只顯示課程類型或標題前幾字
-      const fullLabel = isStart ? (c.type || c.title || c.tag || '') : '';
-      const shortLabel = fullLabel.length > 6 ? fullLabel.slice(0,6)+'…' : fullLabel;
+      // 標籤顯示：單位/課程類型 或 自訂標題
+      let fullLabel = '';
+      if (isStart) {
+        if (c.category === '課程' && c.unit && c.type) fullLabel = `${c.unit}/${c.type}`;
+        else if (c.category === '課程' && c.type) fullLabel = c.type;
+        else fullLabel = c.title || c.tag || '';
+      }
+      const shortLabel = fullLabel.length > 8 ? fullLabel.slice(0,8)+'…' : fullLabel;
       evHtml += `<div class="cal-event-bar ${cls}" style="background:${color}22;color:${color};border-left:${isStart||!isSpan?`2px solid ${color}`:'none'}">${shortLabel}</div>`;
     });
     if (evs.length > 2) evHtml += `<div style="font-size:11px;color:var(--text3);padding-left:4px">+${evs.length-2}</div>`;
+
+    // 檢查這天是否有專案截止日
+    const projectsDue = courses.filter(c => c.category === '專案' && c.date === ds);
+    const projDot = projectsDue.length ? `<div style="width:7px;height:7px;border-radius:50%;background:var(--purple);margin-left:auto;flex-shrink:0" title="${projectsDue.map(p=>p.title).join(', ')}"></div>` : '';
 
     html += `<div class="cal-cell${isToday?' today':''}" onclick="selectDay('${ds}')">
       <div style="display:flex;align-items:center;gap:5px;margin-bottom:4px">
         <div class="cal-day">${day}</div>
         <div style="font-size:11px;color:var(--text3)">${dow}</div>
+        ${projDot}
       </div>
       <div class="cal-events">${evHtml}</div>
     </div>`;
@@ -804,9 +824,10 @@ function closeSheet(id){document.getElementById(id).classList.remove('open');}
 function closeOverlay(e,id){if(e.target===document.getElementById(id))closeSheet(id);}
 
 function switchTab(tab){
-  document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('active',['calendar','schedule','stats'][i]===tab));
+  document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('active',['calendar','schedule','projects','stats'][i]===tab));
   document.querySelectorAll('.section').forEach(s=>s.classList.toggle('active',s.id===tab));
-  if(tab==='stats')renderStats();
+  if(tab==='stats') renderStats();
+  if(tab==='projects') renderProjects();
 }
 
 // ── QUICK INPUT ──
@@ -915,6 +936,60 @@ function fillFormFromQuick(parsed) {
   document.getElementById('f-end').value = parsed.endTime || '';
   document.getElementById('f-location').value = parsed.location || '';
   document.getElementById('f-note').value = parsed.note || '';
+  document.getElementById('form-error').style.display = 'none';
+  document.getElementById('form-overlay').classList.add('open');
+}
+
+// ── PROJECTS ──
+function renderProjects() {
+  const list = document.getElementById('project-list');
+  const projects = courses.filter(c => c.category === '專案').sort((a,b) => a.date.localeCompare(b.date));
+  if (!projects.length) {
+    list.innerHTML = '<div class="empty"><div class="empty-icon">📋</div>尚無專案</div>';
+    return;
+  }
+  const now = new Date(); now.setHours(0,0,0,0);
+  list.innerHTML = projects.map(p => {
+    const due = new Date(p.date + 'T00:00:00');
+    const diffDays = Math.ceil((due - now) / (1000*60*60*24));
+    const isOverdue = diffDays < 0;
+    const isDueSoon = diffDays >= 0 && diffDays <= 7;
+    let statusColor = 'var(--purple)';
+    let statusText = `還有 ${diffDays} 天`;
+    if (isOverdue) { statusColor = 'var(--red)'; statusText = `已逾期 ${Math.abs(diffDays)} 天`; }
+    else if (diffDays === 0) { statusColor = 'var(--orange)'; statusText = '今天截止'; }
+    else if (isDueSoon) { statusColor = 'var(--orange)'; }
+    return `
+    <div class="card cat-專案" onclick="openDetail('${p.id}')" style="margin-bottom:10px">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px">
+        <div style="flex:1">
+          <div class="card-title">${p.title || '未命名專案'}</div>
+          ${p.note ? `<div style="font-size:12px;color:var(--text2);margin-top:4px">${p.note}</div>` : ''}
+        </div>
+        <div style="text-align:right;flex-shrink:0">
+          <div style="font-size:11px;color:${statusColor};font-weight:500;font-family:'DM Mono',monospace">${statusText}</div>
+          <div style="font-size:11px;color:var(--text2);font-family:'DM Mono',monospace;margin-top:2px">${fmtDate(p.date)}</div>
+        </div>
+      </div>
+      <div style="margin-top:10px;height:4px;background:var(--bg3);border-radius:2px;overflow:hidden">
+        <div style="height:100%;background:${statusColor};width:${isOverdue?100:Math.max(5,100-diffDays*2)}%;border-radius:2px;transition:width .3s"></div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function openAddProject() {
+  document.getElementById('form-title').textContent = '新增專案';
+  document.getElementById('f-id').value = '';
+  document.getElementById('f-cat').value = '專案';
+  toggleCourseFields();
+  document.getElementById('f-date').value = '';
+  document.getElementById('f-end-date').value = '';
+  document.getElementById('f-start').value = '';
+  document.getElementById('f-end').value = '';
+  document.getElementById('f-location').value = '';
+  document.getElementById('f-note').value = '';
+  document.getElementById('f-title').value = '';
   document.getElementById('form-error').style.display = 'none';
   document.getElementById('form-overlay').classList.add('open');
 }
