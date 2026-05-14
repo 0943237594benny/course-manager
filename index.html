@@ -212,10 +212,7 @@ textarea{height:72px;resize:none}
   </div>
   <div style="display:flex;gap:8px;align-items:center">
     <button class="add-btn" style="width:auto;border-radius:16px;padding:0 12px;font-size:12px;font-weight:500;background:var(--bg2);color:var(--text2);border:1px solid var(--border)" onclick="openQuickInput()">✦ 快速輸入</button>
-    <div style="display:flex;gap:8px">
-    <button class="add-btn" style="background:var(--bg2);border:1px solid var(--border);color:var(--text2)" onclick="openQuickInput()" title="快速輸入">⚡</button>
     <button class="add-btn" onclick="openAdd()">＋</button>
-  </div>
   </div>
 </div>
 
@@ -280,7 +277,10 @@ textarea{height:72px;resize:none}
 <div class="overlay" id="form-overlay" onclick="closeOverlay(event,'form-overlay')">
   <div class="sheet">
     <div class="sheet-handle"></div>
-    <div class="sheet-title" id="form-title">新增行程</div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px">
+      <div class="sheet-title" style="margin-bottom:0" id="form-title">新增行程</div>
+      <button onclick="closeSheet('form-overlay');openQuickInput()" style="font-size:12px;color:var(--blue);background:none;border:none;cursor:pointer;padding:4px 8px;font-family:'Noto Sans TC',sans-serif">⚡ 快速輸入</button>
+    </div>
     <div class="error-bar" id="form-error"></div>
     <input type="hidden" id="f-id">
 
@@ -430,42 +430,42 @@ textarea{height:72px;resize:none}
 
     <div class="form-group">
       <label class="form-label">標籤</label>
-      <div style="display:flex;flex-wrap:wrap;gap:6px" id="q-tag-btns">
-        <button class="q-btn q-tag active" data-val="授課-教官" onclick="selectQ('tag',this)" style="border-color:var(--red);color:var(--red)">授課-教官</button>
-        <button class="q-btn q-tag" data-val="授課-助教" onclick="selectQ('tag',this)" style="color:var(--orange)">授課-助教</button>
-        <button class="q-btn q-tag" data-val="訓練" onclick="selectQ('tag',this)" style="color:var(--blue)">訓練</button>
-        <button class="q-btn q-tag" data-val="其他" onclick="selectQ('tag',this)" style="color:var(--amber)">其他</button>
+      <div style="display:flex;flex-wrap:wrap;gap:6px" id="q-tag-btns" onclick="handleQClick(event,'tag')">
+        <button class="q-btn q-tag active" data-val="授課-教官" style="border-color:var(--red);color:var(--red)">授課-教官</button>
+        <button class="q-btn q-tag" data-val="授課-助教" style="color:var(--orange)">授課-助教</button>
+        <button class="q-btn q-tag" data-val="訓練" style="color:var(--blue)">訓練</button>
+        <button class="q-btn q-tag" data-val="其他" style="color:var(--amber)">其他</button>
       </div>
     </div>
 
     <div class="form-group" id="q-unit-wrap">
       <label class="form-label">單位</label>
-      <div style="display:flex;flex-wrap:wrap;gap:6px">
-        <button class="q-btn q-unit active" data-val="TEMTA" onclick="selectQ('unit',this)">TEMTA</button>
-        <button class="q-btn q-unit" data-val="公寓大廈" onclick="selectQ('unit',this)">公寓大廈</button>
-        <button class="q-btn q-unit" data-val="一大" onclick="selectQ('unit',this)">一大</button>
-        <button class="q-btn q-unit" data-val="後指部" onclick="selectQ('unit',this)">後指部</button>
-        <button class="q-btn q-unit" data-val="EOC" onclick="selectQ('unit',this)">EOC</button>
+      <div style="display:flex;flex-wrap:wrap;gap:6px" onclick="handleQClick(event,'unit')">
+        <button class="q-btn q-unit active" data-val="TEMTA">TEMTA</button>
+        <button class="q-btn q-unit" data-val="公寓大廈">公寓大廈</button>
+        <button class="q-btn q-unit" data-val="一大">一大</button>
+        <button class="q-btn q-unit" data-val="後指部">後指部</button>
+        <button class="q-btn q-unit" data-val="EOC">EOC</button>
       </div>
     </div>
 
     <div class="form-group">
       <label class="form-label">課程類型</label>
-      <div style="display:flex;flex-wrap:wrap;gap:6px">
-        <button class="q-btn q-type active" data-val="T1" onclick="selectQ('type',this)">T1</button>
-        <button class="q-btn q-type" data-val="T1+" onclick="selectQ('type',this)">T1+</button>
-        <button class="q-btn q-type" data-val="T2" onclick="selectQ('type',this)">T2</button>
-        <button class="q-btn q-type" data-val="T2+" onclick="selectQ('type',this)">T2+</button>
-        <button class="q-btn q-type" data-val="TP" onclick="selectQ('type',this)">TP</button>
-        <button class="q-btn q-type" data-val="TP+" onclick="selectQ('type',this)">TP+</button>
-        <button class="q-btn q-type" data-val="服勤人員" onclick="selectQ('type',this)">服勤人員</button>
-        <button class="q-btn q-type" data-val="民眾版BLS" onclick="selectQ('type',this)">民眾版BLS</button>
-        <button class="q-btn q-type" data-val="EOC民眾版" onclick="selectQ('type',this)">EOC民眾版</button>
-        <button class="q-btn q-type" data-val="防災士" onclick="selectQ('type',this)">防災士</button>
-        <button class="q-btn q-type" data-val="義消BLS" onclick="selectQ('type',this)">義消BLS</button>
-        <button class="q-btn q-type" data-val="EMT-1" onclick="selectQ('type',this)">EMT-1</button>
-        <button class="q-btn q-type" data-val="EMT-1+" onclick="selectQ('type',this)">EMT-1+</button>
-        <button class="q-btn q-type" data-val="EMT-2+" onclick="selectQ('type',this)">EMT-2+</button>
+      <div style="display:flex;flex-wrap:wrap;gap:6px" onclick="handleQClick(event,'type')">
+        <button class="q-btn q-type active" data-val="T1">T1</button>
+        <button class="q-btn q-type" data-val="T1+">T1+</button>
+        <button class="q-btn q-type" data-val="T2">T2</button>
+        <button class="q-btn q-type" data-val="T2+">T2+</button>
+        <button class="q-btn q-type" data-val="TP">TP</button>
+        <button class="q-btn q-type" data-val="TP+">TP+</button>
+        <button class="q-btn q-type" data-val="服勤人員">服勤人員</button>
+        <button class="q-btn q-type" data-val="民眾版BLS">民眾版BLS</button>
+        <button class="q-btn q-type" data-val="EOC民眾版">EOC民眾版</button>
+        <button class="q-btn q-type" data-val="防災士">防災士</button>
+        <button class="q-btn q-type" data-val="義消BLS">義消BLS</button>
+        <button class="q-btn q-type" data-val="EMT-1">EMT-1</button>
+        <button class="q-btn q-type" data-val="EMT-1+">EMT-1+</button>
+        <button class="q-btn q-type" data-val="EMT-2+">EMT-2+</button>
       </div>
     </div>
 
@@ -512,8 +512,8 @@ textarea{height:72px;resize:none}
 </div>
 
 <style>
-.q-btn{padding:6px 12px;border-radius:20px;border:1px solid var(--border);background:var(--bg3);color:var(--text2);font-size:12px;cursor:pointer;font-family:'Noto Sans TC',sans-serif;transition:all .15s}
-.q-btn.active{border-color:currentColor;background:rgba(255,255,255,0.05)}
+.q-btn{padding:6px 12px;border-radius:20px;border:1px solid var(--border);background:var(--bg3);color:var(--text2);font-size:12px;cursor:pointer;font-family:'Noto Sans TC',sans-serif;transition:all .15s;-webkit-tap-highlight-color:transparent;user-select:none}
+.q-btn.active{border-color:currentColor;background:rgba(255,255,255,0.08);font-weight:500}
 /* 月曆選擇器 */
 .mini-cal{width:100%}
 .mini-cal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
@@ -1074,6 +1074,12 @@ function openQuickInput() {
   qSelected = { tag:'授課-教官', unit:'TEMTA', type:'T1' };
   document.getElementById('q-text').value = '';
   document.getElementById('quick-overlay').classList.add('open');
+}
+
+function handleQClick(event, field) {
+  const btn = event.target.closest('.q-btn');
+  if (!btn || !btn.dataset.val) return;
+  selectQ(field, btn);
 }
 
 function selectQ(field, btn) {
