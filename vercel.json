@@ -10,6 +10,7 @@
     { "src": "/api/callback", "dest": "/api/callback.js" },
     { "src": "/api/notion", "dest": "/api/notion.js" },
     { "src": "/api/nodes", "dest": "/api/nodes.js" },
+    { "src": "/api/schedule", "dest": "/api/schedule.js" },
     { "src": "/(.*)", "dest": "/$1" }
   ]
 }
