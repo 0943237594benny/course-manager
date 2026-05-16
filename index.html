@@ -55,7 +55,7 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--text
 .filters{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap}
 .filter-btn{display:flex;align-items:center;gap:5px;padding:5px 10px;border-radius:20px;border:1px solid var(--border);font-size:11px;cursor:pointer;color:var(--text2);background:var(--bg2);transition:all .15s;font-family:'Noto Sans TC',sans-serif}
 .filter-btn.active{border-color:transparent;color:#fff}
-.filter-btn.f-課程.active{background:var(--blue-bg);color:var(--blue);border-color:var(--blue)}
+.filter-btn.f-課程.active{background:var(--blue-bg);color:#fff;border-color:var(--blue)}
 .filter-btn.f-生活.active{background:var(--green-bg);color:var(--green);border-color:var(--green)}
 .filter-btn.f-專案.active{background:var(--purple-bg);color:var(--purple);border-color:var(--purple)}
 .filter-btn.f-公務.active{background:rgba(230,126,34,0.12);color:#e67e22;border-color:#e67e22}
@@ -82,7 +82,7 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--text
 .tag-授課-助教{background:var(--orange-bg);color:var(--orange)}
 .tag-訓練{background:var(--blue-bg);color:var(--blue)}
 .tag-其他{background:var(--amber-bg);color:var(--amber)}
-.cat-課程{background:var(--blue-bg);color:var(--blue)}
+.cat-課程{background:var(--blue-bg);color:#fff}
 .cat-生活{background:var(--green-bg);color:var(--green)}
 .cat-專案{background:var(--purple-bg);color:var(--purple)}
 .cat-公務{background:rgba(230,126,34,0.12);color:#e67e22}
@@ -440,7 +440,7 @@ textarea{height:72px;resize:none}
     <div class="form-group">
       <label class="form-label">類別</label>
       <div style="display:flex;flex-wrap:wrap;gap:6px" onclick="handleQCatClick(event)">
-        <button class="q-btn q-cat active" data-val="課程" style="color:var(--blue)">課程</button>
+        <button class="q-btn q-cat active" data-val="課程" style="color:#fff">課程</button>
         <button class="q-btn q-cat" data-val="生活" style="color:var(--green)">生活</button>
         <button class="q-btn q-cat" data-val="專案" style="color:var(--purple)">專案</button>
         <button class="q-btn q-cat" data-val="公務" style="color:#e67e22">公務</button>
