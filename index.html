@@ -58,6 +58,7 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--text
 .filter-btn.f-課程.active{background:var(--blue-bg);color:var(--blue);border-color:var(--blue)}
 .filter-btn.f-生活.active{background:var(--green-bg);color:var(--green);border-color:var(--green)}
 .filter-btn.f-專案.active{background:var(--purple-bg);color:var(--purple);border-color:var(--purple)}
+.filter-btn.f-公務.active{background:rgba(230,126,34,0.12);color:#e67e22;border-color:#e67e22}
 .filter-btn.f-其他.active{background:var(--amber-bg);color:var(--amber);border-color:var(--amber)}
 .filter-dot{width:7px;height:7px;border-radius:50%}
 
@@ -1454,8 +1455,8 @@ function isWorkDay(dateStr) {
 function getWorkDayColor(dateStr) {
   const work = isWorkDay(dateStr);
   const isOverride = workScheduleOverrides.some(o => o.date === dateStr);
-  if (work) return isOverride ? 'rgba(45,140,255,0.18)' : 'rgba(45,140,255,0.08)';
-  return isOverride ? 'rgba(45,204,112,0.18)' : 'rgba(45,204,112,0.06)';
+  if (work) return isOverride ? 'rgba(45,140,255,0.35)' : 'rgba(45,140,255,0.20)';
+  return isOverride ? 'rgba(45,204,112,0.35)' : 'rgba(45,204,112,0.20)';
 }
 
 async function loadWorkSchedule() {
