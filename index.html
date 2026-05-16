@@ -84,6 +84,7 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--text
 .cat-課程{background:var(--blue-bg);color:var(--blue)}
 .cat-生活{background:var(--green-bg);color:var(--green)}
 .cat-專案{background:var(--purple-bg);color:var(--purple)}
+.cat-公務{background:rgba(230,126,34,0.12);color:#e67e22}
 .cat-其他{background:var(--amber-bg);color:var(--amber)}
 
 /* DAY DETAIL */
@@ -222,6 +223,7 @@ textarea{height:72px;resize:none}
   <div class="tab" onclick="switchTab('schedule')">行程</div>
   <div class="tab" onclick="switchTab('projects')">專案</div>
   <div class="tab" onclick="switchTab('stats')">統計</div>
+  <div class="tab" onclick="switchTab('worksched')">班表</div>
 </div>
 
 <!-- CALENDAR TAB -->
@@ -237,6 +239,7 @@ textarea{height:72px;resize:none}
       <div class="filter-btn f-課程 active" onclick="toggleFilter('課程')"><div class="filter-dot" style="background:var(--blue)"></div>課程</div>
       <div class="filter-btn f-生活 active" onclick="toggleFilter('生活')"><div class="filter-dot" style="background:var(--green)"></div>生活</div>
       <div class="filter-btn f-專案 active" onclick="toggleFilter('專案')"><div class="filter-dot" style="background:var(--purple)"></div>專案</div>
+      <div class="filter-btn f-公務 active" onclick="toggleFilter('公務')"><div class="filter-dot" style="background:#e67e22"></div>公務</div>
       <div class="filter-btn f-其他 active" onclick="toggleFilter('其他')"><div class="filter-dot" style="background:var(--amber)"></div>其他</div>
     </div>
     <div class="cal-grid" id="cal-grid"></div>
@@ -259,6 +262,28 @@ textarea{height:72px;resize:none}
   <div style="margin-top:12px">
     <button onclick="openAddProject()" style="width:100%;padding:12px;background:var(--purple-bg);color:var(--purple);border:1px dashed var(--purple);border-radius:var(--r);font-size:13px;cursor:pointer;font-family:'Noto Sans TC',sans-serif;">＋ 新增專案</button>
   </div>
+</div>
+
+<!-- WORK SCHEDULE TAB -->
+<div id="worksched" class="section">
+  <div style="margin-bottom:14px">
+    <div style="font-size:12px;color:var(--text2);margin-bottom:8px;font-family:'DM Mono',monospace;letter-spacing:.04em">班表規則</div>
+    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:14px">
+      <div style="display:flex;align-items:center;gap:10px">
+        <div style="width:10px;height:10px;border-radius:50%;background:#2d8cff;flex-shrink:0"></div>
+        <div style="font-size:13px">偶數日上班</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;margin-top:8px">
+        <div style="width:10px;height:10px;border-radius:50%;background:#2dcc70;flex-shrink:0"></div>
+        <div style="font-size:13px">奇數日放假</div>
+      </div>
+    </div>
+  </div>
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+    <div style="font-size:12px;color:var(--text2);font-family:'DM Mono',monospace;letter-spacing:.04em">手動調整</div>
+    <button onclick="openAddWorkSched()" style="font-size:12px;color:var(--blue);background:none;border:none;cursor:pointer;font-family:'Noto Sans TC',sans-serif">＋ 新增調整</button>
+  </div>
+  <div id="worksched-list"><div class="loading"><div class="spinner"></div>載入中...</div></div>
 </div>
 
 <!-- STATS TAB -->
@@ -290,6 +315,7 @@ textarea{height:72px;resize:none}
         <option value="課程">課程</option>
         <option value="生活">生活</option>
         <option value="專案">專案</option>
+        <option value="公務">公務</option>
         <option value="其他">其他</option>
       </select>
     </div>
@@ -416,6 +442,7 @@ textarea{height:72px;resize:none}
         <button class="q-btn q-cat active" data-val="課程" style="color:var(--blue)">課程</button>
         <button class="q-btn q-cat" data-val="生活" style="color:var(--green)">生活</button>
         <button class="q-btn q-cat" data-val="專案" style="color:var(--purple)">專案</button>
+        <button class="q-btn q-cat" data-val="公務" style="color:#e67e22">公務</button>
         <button class="q-btn q-cat" data-val="其他" style="color:var(--amber)">其他</button>
       </div>
     </div>
@@ -505,6 +532,35 @@ textarea{height:72px;resize:none}
   </div>
 </div>
 
+<!-- 班表調整 Sheet -->
+<div class="overlay" id="worksched-overlay">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title">新增班表調整</div>
+    <div class="form-group">
+      <label class="form-label">日期</label>
+      <div id="worksched-cal-wrap"></div>
+      <input type="hidden" id="ws-date">
+      <div id="ws-date-display" style="font-size:12px;color:var(--text2);margin-top:6px;font-family:'DM Mono',monospace"></div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">調整為</label>
+      <select id="ws-type">
+        <option value="上班">上班</option>
+        <option value="放假">放假</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">備注（選填）</label>
+      <input type="text" id="ws-note" placeholder="例：調班">
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-ghost" onclick="closeSheet('worksched-overlay')">取消</button>
+      <button class="btn btn-primary" onclick="saveWorkSched()">儲存</button>
+    </div>
+  </div>
+</div>
+
 <style>
 .q-btn{padding:6px 12px;border-radius:20px;border:1px solid var(--border);background:var(--bg3);color:var(--text2);font-size:12px;cursor:pointer;font-family:'Noto Sans TC',sans-serif;transition:all .15s;-webkit-tap-highlight-color:transparent;user-select:none}
 .q-btn.active{border-color:currentColor;background:rgba(255,255,255,0.08);font-weight:500}
@@ -535,7 +591,7 @@ textarea{height:72px;resize:none}
 const API = '/api/notion';
 let courses = [];
 let currentMonth = new Date();
-let activeFilters = new Set(['課程','生活','專案','其他']);
+let activeFilters = new Set(['課程','生活','專案','公務','其他']);
 let showExpired = false;
 let selectedDate = null;
 
@@ -566,6 +622,7 @@ async function loadCourses() {
   try {
     const r = await fetch(`${API}?action=list`);
     courses = await r.json();
+    await loadWorkSchedule();
     renderCalendar();
     renderSchedule();
     renderStats();
@@ -578,7 +635,7 @@ async function loadCourses() {
 }
 
 // ── CALENDAR ──
-const CAT_COLOR = { '課程':'#2d8cff','生活':'#2dcc70','專案':'#9b59b6','其他':'#ffc107' };
+const CAT_COLOR = { '課程':'#2d8cff','生活':'#2dcc70','專案':'#9b59b6','公務':'#e67e22','其他':'#ffc107' };
 const TAG_COLOR = { '授課-教官':'#ff4444','授課-助教':'#ff8c00','訓練':'#2d8cff','其他':'#ffc107' };
 
 function getEventColor(c) {
@@ -671,7 +728,8 @@ function renderCalendar() {
     const projectsDue = courses.filter(c => c.category === '專案' && c.date === ds);
     const projDot = projectsDue.length ? `<div style="width:7px;height:7px;border-radius:50%;background:var(--purple);margin-left:auto;flex-shrink:0" title="${projectsDue.map(p=>p.title).join(', ')}"></div>` : '';
 
-    html += `<div class="cal-cell${isToday?' today':''}" onclick="selectDay('${ds}')">
+    const wsBg = getWorkDayColor(ds);
+    html += `<div class="cal-cell${isToday?' today':''}" style="background:${wsBg}" onclick="selectDay('${ds}')">
       <div style="display:flex;align-items:center;gap:5px;margin-bottom:4px">
         <div class="cal-day">${day}</div>
         <div style="font-size:11px;color:var(--text3)">${dow}</div>
@@ -789,7 +847,7 @@ function toggleExpired(){showExpired=!showExpired;renderSchedule()}
 // ── STATS ──
 function renderStats(){
   const tagColors={'授課-教官':'#ff4444','授課-助教':'#ff8c00','訓練':'#2d8cff','其他':'#ffc107'};
-  const catColors={'課程':'#2d8cff','生活':'#2dcc70','專案':'#9b59b6','其他':'#ffc107'};
+  const catColors={'課程':'#2d8cff','生活':'#2dcc70','專案':'#9b59b6','公務':'#e67e22','其他':'#ffc107'};
   function makeChart(counts,colors,el){
     const max=Math.max(1,...Object.values(counts));
     document.getElementById(el).innerHTML=Object.entries(counts).sort((a,b)=>b[1]-a[1]).map(([k,n])=>`
@@ -943,10 +1001,11 @@ function closeSheet(id){document.getElementById(id).classList.remove('open');}
 function closeOverlay(e,id){if(e.target===document.getElementById(id))closeSheet(id);}
 
 function switchTab(tab){
-  document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('active',['calendar','schedule','projects','stats'][i]===tab));
+  document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('active',['calendar','schedule','projects','stats','worksched'][i]===tab));
   document.querySelectorAll('.section').forEach(s=>s.classList.toggle('active',s.id===tab));
   if(tab==='stats') renderStats();
   if(tab==='projects') renderProjects();
+  if(tab==='worksched') renderWorkSchedList();
 }
 
 // ── QUICK INPUT ──
@@ -1168,11 +1227,20 @@ function miniCalNav(dir, containerId) {
 
 function selectNodeDate(ds, containerId) {
   selectedNodeDate = ds;
-  document.getElementById('node-date').value = ds;
   const [y,m,d] = ds.split('-').map(Number);
   const days=['日','一','二','三','四','五','六'];
   const dt = new Date(y,m-1,d);
-  document.getElementById('node-date-display').textContent = `已選：${m}/${d}（${days[dt.getDay()]}）`;
+  const label = `已選：${m}/${d}（${days[dt.getDay()]}）`;
+  // 更新節點日期
+  if (document.getElementById('node-date')) {
+    document.getElementById('node-date').value = ds;
+    document.getElementById('node-date-display').textContent = label;
+  }
+  // 更新班表日期
+  if (document.getElementById('ws-date')) {
+    document.getElementById('ws-date').value = ds;
+    document.getElementById('ws-date-display').textContent = label;
+  }
   renderMiniCal(containerId);
 }
 
@@ -1369,6 +1437,92 @@ function openAddProject() {
   document.getElementById('f-title').value = '';
   document.getElementById('form-error').style.display = 'none';
   document.getElementById('form-overlay').classList.add('open');
+}
+
+// ── WORK SCHEDULE ──
+let workScheduleOverrides = []; // 手動調整列表
+
+function isWorkDay(dateStr) {
+  // 先查手動調整
+  const override = workScheduleOverrides.find(o => o.date === dateStr);
+  if (override) return override.type === '上班';
+  // 否則用偶數日上班規則
+  const day = parseInt(dateStr.split('-')[2]);
+  return day % 2 === 0;
+}
+
+function getWorkDayColor(dateStr) {
+  const work = isWorkDay(dateStr);
+  const isOverride = workScheduleOverrides.some(o => o.date === dateStr);
+  if (work) return isOverride ? 'rgba(45,140,255,0.18)' : 'rgba(45,140,255,0.08)';
+  return isOverride ? 'rgba(45,204,112,0.18)' : 'rgba(45,204,112,0.06)';
+}
+
+async function loadWorkSchedule() {
+  try {
+    const r = await fetch('/api/schedule?action=list');
+    const data = await r.json();
+    if (Array.isArray(data)) {
+      workScheduleOverrides = data;
+      renderWorkSchedList();
+    }
+  } catch(e) { console.error('班表載入失敗', e); }
+}
+
+function renderWorkSchedList() {
+  const list = document.getElementById('worksched-list');
+  if (!list) return;
+  if (!workScheduleOverrides.length) {
+    list.innerHTML = '<div class="empty" style="padding:24px 0"><div class="empty-icon">📅</div>尚無手動調整</div>';
+    return;
+  }
+  list.innerHTML = workScheduleOverrides.map(o => {
+    const isWork = o.type === '上班';
+    return `<div style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);margin-bottom:8px">
+      <div style="width:10px;height:10px;border-radius:50%;background:${isWork?'#2d8cff':'#2dcc70'};flex-shrink:0"></div>
+      <div style="flex:1">
+        <div style="font-size:13px;font-weight:500">${fmtDate(o.date)}</div>
+        <div style="font-size:11px;color:var(--text2);margin-top:2px">${isWork?'原為放假 → 改為上班':'原為上班 → 改為放假'}${o.note?` · ${o.note}`:''}</div>
+      </div>
+      <div style="font-size:18px;color:var(--text3);cursor:pointer" onclick="deleteWorkSched('${o.id}')">×</div>
+    </div>`;
+  }).join('');
+}
+
+function openAddWorkSched() {
+  document.getElementById('worksched-overlay').classList.add('open');
+  selectedNodeDate = '';
+  miniCalMonth = new Date();
+  renderMiniCal('worksched-cal-wrap');
+  document.getElementById('ws-type').value = '上班';
+  document.getElementById('ws-note').value = '';
+  document.getElementById('ws-date').value = '';
+  document.getElementById('ws-date-display').textContent = '';
+}
+
+async function saveWorkSched() {
+  const date = document.getElementById('ws-date').value;
+  const type = document.getElementById('ws-type').value;
+  const note = document.getElementById('ws-note').value.trim();
+  if (!date) { alert('請選擇日期'); return; }
+  try {
+    const r = await fetch('/api/schedule?action=create', {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ date, type, note })
+    });
+    const data = await r.json();
+    if (data.error) { alert('儲存失敗：' + data.error); return; }
+    await loadWorkSchedule();
+    closeSheet('worksched-overlay');
+    renderCalendar();
+  } catch(e) { alert('連線失敗'); }
+}
+
+async function deleteWorkSched(id) {
+  if (!confirm('確定刪除這筆調整？')) return;
+  await fetch(`/api/schedule?action=delete&pageId=${id}`, { method: 'DELETE' });
+  await loadWorkSchedule();
+  renderCalendar();
 }
 
 checkAuth();
