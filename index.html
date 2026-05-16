@@ -721,7 +721,8 @@ function renderCalendar() {
         else fullLabel = c.title || c.tag || '';
       }
       const shortLabel = fullLabel.length > 8 ? fullLabel.slice(0,8)+'…' : fullLabel;
-      evHtml += `<div class="cal-event-bar ${cls}" style="background:${color}22;color:${color};border-left:${isStart||!isSpan?`2px solid ${color}`:'none'}">${shortLabel}</div>`;
+      const textColor = (c.category === '課程' || (!c.category && c.tag)) ? '#fff' : color;
+      evHtml += `<div class="cal-event-bar ${cls}" style="background:${color}22;color:${textColor};border-left:${isStart||!isSpan?`2px solid ${color}`:'none'}">${shortLabel}</div>`;
     });
     if (evs.length > 2) evHtml += `<div style="font-size:11px;color:var(--text3);padding-left:4px">+${evs.length-2}</div>`;
 
