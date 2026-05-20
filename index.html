@@ -957,16 +957,13 @@ function openEdit(id){
   setComboValue('f-tag','f-tag-select',c.tag||'授課-教官');
   setComboValue('f-unit','f-unit-select',c.unit||'');
   setComboValue('f-type','f-type-select',c.type||'');
-  toggleUnitField();
-  document.getElementById('f-date').value=c.date||'';
-  document.getElementById('f-end-date').value=c.endDate||'';
+  toggleUnitAndTrainField();
   formDateStart = c.date || '';
   formDateEnd = c.endDate || '';
   formDateStep = 0;
+  document.getElementById('f-date').value = c.date || '';
+  document.getElementById('f-end-date').value = c.endDate || '';
   if (c.date) formCalMonth = new Date(c.date+'T00:00:00');
-  setTimeout(() => { renderFormCal(); updateFormDateDisplay(); }, 50);
-  document.getElementById('f-end-date').value=c.endDate||'';
-  document.getElementById('f-end-date-display').textContent=formatDateDisplay(c.endDate||'');
   document.getElementById('f-start').value=c.startTime||'';
   document.getElementById('f-end').value=c.endTime||'';
   document.getElementById('f-location').value=c.location||'';
@@ -975,6 +972,7 @@ function openEdit(id){
   if(document.getElementById('f-train-name')) document.getElementById('f-train-name').value=c.trainName||'';
   document.getElementById('form-error').style.display='none';
   document.getElementById('form-overlay').classList.add('open');
+  setTimeout(() => { renderFormCal(); updateFormDateDisplay(); }, 50);
 }
 
 async function saveCourse(){
