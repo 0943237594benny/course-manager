@@ -272,11 +272,11 @@ textarea{height:72px;resize:none}
     <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:14px">
       <div style="display:flex;align-items:center;gap:10px">
         <div style="width:10px;height:10px;border-radius:50%;background:#2d8cff;flex-shrink:0"></div>
-        <div style="font-size:13px">偶數日上班</div>
+        <div style="font-size:13px">勤一休一（基準：2026/5/20 上班）</div>
       </div>
       <div style="display:flex;align-items:center;gap:10px;margin-top:8px">
         <div style="width:10px;height:10px;border-radius:50%;background:#2dcc70;flex-shrink:0"></div>
-        <div style="font-size:13px">奇數日放假</div>
+        <div style="font-size:13px">跨月自動推算，無需手動設定</div>
       </div>
     </div>
   </div>
@@ -1448,9 +1448,11 @@ function isWorkDay(dateStr) {
   // 先查手動調整
   const override = workScheduleOverrides.find(o => o.date === dateStr);
   if (override) return override.type === '上班';
-  // 否則用偶數日上班規則
-  const day = parseInt(dateStr.split('-')[2]);
-  return day % 2 === 0;
+  // 基準日 2026-05-20 是上班日，勤一休一循環
+  const base = new Date('2026-05-20T00:00:00');
+  const target = new Date(dateStr + 'T00:00:00');
+  const diffDays = Math.round((target - base) / (1000*60*60*24));
+  return diffDays % 2 === 0;
 }
 
 function getWorkDayColor(dateStr) {
