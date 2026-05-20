@@ -325,7 +325,7 @@ textarea{height:72px;resize:none}
       <div class="form-group">
         <label class="form-label">標籤（你的身份）</label>
         <div class="combo-wrap">
-          <select id="f-tag-select" onchange="comboSelect('f-tag','f-tag-select');toggleUnitField()">
+          <select id="f-tag-select" onchange="comboSelect('f-tag','f-tag-select');toggleUnitAndTrainField()">
             <option value="授課-教官">授課-教官（主教官）</option>
             <option value="授課-助教">授課-助教（助教）</option>
             <option value="訓練">訓練（受訓/複訓）</option>
@@ -376,22 +376,22 @@ textarea{height:72px;resize:none}
       </div>
     </div>
 
+    <div class="form-group" id="train-name-group" style="display:none">
+      <label class="form-label">課程名稱</label>
+      <input type="text" id="f-train-name" placeholder="例：TP+ 老人急症－力學轉移">
+    </div>
+
     <div class="form-group" id="title-group" style="display:none">
       <label class="form-label">標題</label>
       <input type="text" id="f-title" placeholder="行程名稱">
     </div>
 
-    <div class="form-row">
-      <div class="form-group">
-        <label class="form-label">開始日期</label>
-        <input type="date" id="f-date" onchange="document.getElementById('f-date-display').textContent=formatDateDisplay(this.value)">
-        <div id="f-date-display" style="font-size:11px;color:var(--text2);margin-top:4px;font-family:'DM Mono',monospace"></div>
-      </div>
-      <div class="form-group">
-        <label class="form-label">結束日期（選填）</label>
-        <input type="date" id="f-end-date" onchange="document.getElementById('f-end-date-display').textContent=formatDateDisplay(this.value)">
-        <div id="f-end-date-display" style="font-size:11px;color:var(--text2);margin-top:4px;font-family:'DM Mono',monospace"></div>
-      </div>
+    <div class="form-group">
+      <label class="form-label">日期（點選開始日，再點結束日）</label>
+      <div id="form-cal-wrap"></div>
+      <input type="hidden" id="f-date">
+      <input type="hidden" id="f-end-date">
+      <div id="form-date-display" style="font-size:12px;color:var(--text2);margin-top:6px;font-family:'DM Mono',monospace;min-height:18px"></div>
     </div>
     <div class="form-row">
       <div class="form-group">
@@ -576,6 +576,9 @@ textarea{height:72px;resize:none}
 .mini-day:hover{background:var(--bg3)}
 .mini-day.today{font-weight:600;color:var(--text)}
 .mini-day.selected{background:var(--text);color:var(--bg);font-weight:600}
+.mini-day.in-range{background:rgba(255,255,255,0.1)}
+.mini-day.range-start{border-radius:6px 0 0 6px}
+.mini-day.range-end{border-radius:0 6px 6px 0}
 .mini-day.other{color:var(--text3)}
 /* 節點列表 */
 .node-item{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)}
@@ -716,7 +719,8 @@ function renderCalendar() {
       // 標籤顯示：單位/課程類型 或 自訂標題
       let fullLabel = '';
       if (isStart) {
-        if (c.category === '課程' && c.unit && c.type) fullLabel = `${c.unit}/${c.type}`;
+        if (c.tag === '訓練' && c.trainName) fullLabel = c.trainName;
+        else if (c.category === '課程' && c.unit && c.type) fullLabel = `${c.unit}/${c.type}`;
         else if (c.category === '課程' && c.type) fullLabel = c.type;
         else fullLabel = c.title || c.tag || '';
       }
@@ -829,7 +833,9 @@ function fmtDate(d){if(!d)return'';const dt=new Date(d+'T00:00:00');const days=[
 
 function cardHTML(c, isExpired) {
   const cls = getEventClass(c);
-  const title = c.title || `[${c.tag||''}/${c.unit||''}] ${c.type||''}`.replace('/]','').replace('[/','');
+  const title = c.tag === '訓練' && c.trainName
+    ? `[訓練] ${c.trainName}`
+    : c.title || `[${c.tag||''}/${c.unit||''}] ${c.type||''}`.replace('/]','').replace('[/','');
   const badgeCls = c.category==='生活'?'badge-生活':c.category==='專案'?'badge-專案':`badge-${c.tag||'其他'}`;
   const badgeLabel = c.category==='生活'?'生活':c.category==='專案'?'專案':(c.tag||'其他');
   const endDateStr = c.endDate && c.endDate!==c.date ? ` → ${fmtDate(c.endDate)}` : '';
@@ -874,6 +880,19 @@ function toggleCourseFields(){
   const isCourse=cat==='課程';
   document.getElementById('course-fields').style.display=isCourse?'block':'none';
   document.getElementById('title-group').style.display=isCourse?'none':'block';
+  // 訓練時顯示課程名稱欄位
+  const tag = getComboValue('f-tag','f-tag-select');
+  const isTraining = isCourse && tag === '訓練';
+  const trainGroup = document.getElementById('train-name-group');
+  if (trainGroup) trainGroup.style.display = isTraining ? 'block' : 'none';
+}
+
+function toggleUnitAndTrainField(){
+  toggleUnitField();
+  // 訓練時顯示課程名稱
+  const tag = getComboValue('f-tag','f-tag-select');
+  const trainGroup = document.getElementById('train-name-group');
+  if (trainGroup) trainGroup.style.display = tag === '訓練' ? 'block' : 'none';
 }
 function toggleUnitField(){
   const tag=getComboValue('f-tag','f-tag-select');
@@ -923,6 +942,9 @@ function openAdd(){
   document.getElementById('f-title').value='';
   document.getElementById('form-error').style.display='none';
   document.getElementById('form-overlay').classList.add('open');
+  formDateStart = ''; formDateEnd = ''; formDateStep = 0;
+  formCalMonth = new Date();
+  setTimeout(() => renderFormCal(), 50);
 }
 
 function openEdit(id){
@@ -937,7 +959,12 @@ function openEdit(id){
   setComboValue('f-type','f-type-select',c.type||'');
   toggleUnitField();
   document.getElementById('f-date').value=c.date||'';
-  document.getElementById('f-date-display').textContent=formatDateDisplay(c.date||'');
+  document.getElementById('f-end-date').value=c.endDate||'';
+  formDateStart = c.date || '';
+  formDateEnd = c.endDate || '';
+  formDateStep = 0;
+  if (c.date) formCalMonth = new Date(c.date+'T00:00:00');
+  setTimeout(() => { renderFormCal(); updateFormDateDisplay(); }, 50);
   document.getElementById('f-end-date').value=c.endDate||'';
   document.getElementById('f-end-date-display').textContent=formatDateDisplay(c.endDate||'');
   document.getElementById('f-start').value=c.startTime||'';
@@ -945,6 +972,7 @@ function openEdit(id){
   document.getElementById('f-location').value=c.location||'';
   document.getElementById('f-note').value=c.note||'';
   document.getElementById('f-title').value=c.title||'';
+  if(document.getElementById('f-train-name')) document.getElementById('f-train-name').value=c.trainName||'';
   document.getElementById('form-error').style.display='none';
   document.getElementById('form-overlay').classList.add('open');
 }
@@ -962,7 +990,8 @@ async function saveCourse(){
   const title=isCourse?`[${tag}/${unit}] ${type}`:customTitle;
   if(!date){showError('請選擇日期');return;}
   if(!isCourse&&!customTitle){showError('請輸入標題');return;}
-  const body={tag,unit,type,category:cat,title,date,endDate,startTime:document.getElementById('f-start').value,endTime:document.getElementById('f-end').value,location:document.getElementById('f-location').value,note:document.getElementById('f-note').value};
+  const trainName=document.getElementById('f-train-name')?document.getElementById('f-train-name').value.trim():'';
+  const body={tag,unit,type,category:cat,title,trainName,date,endDate,startTime:document.getElementById('f-start').value,endTime:document.getElementById('f-end').value,location:document.getElementById('f-location').value,note:document.getElementById('f-note').value};
   try{
     const url=id?`${API}?action=update&pageId=${id}`:`${API}?action=create`;
     const method=id?'PATCH':'POST';
@@ -1083,6 +1112,117 @@ function updateQPreview() {
   document.getElementById('q-text').value = preview;
 }
 
+// ── 表單日曆範圍選取 ──
+let formCalMonth = new Date();
+let formDateStart = '';
+let formDateEnd = '';
+let formDateStep = 0; // 0=選開始日, 1=選結束日
+
+function openFormCal() {
+  formCalMonth = new Date();
+  renderFormCal();
+}
+
+function renderFormCal() {
+  const wrap = document.getElementById('form-cal-wrap');
+  if (!wrap) return;
+  const y = formCalMonth.getFullYear();
+  const m = formCalMonth.getMonth();
+  const months = ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
+  const first = new Date(y,m,1);
+  const last = new Date(y,m+1,0);
+  const today = new Date(); today.setHours(0,0,0,0);
+
+  let html = `<div class="mini-cal">
+    <div class="mini-cal-header">
+      <div class="mini-cal-nav" onclick="formCalNav(-1)">‹</div>
+      <div class="mini-cal-title">${y}/${months[m]}</div>
+      <div class="mini-cal-nav" onclick="formCalNav(1)">›</div>
+    </div>
+    <div class="mini-grid">`;
+
+  ['日','一','二','三','四','五','六'].forEach(d => { html += `<div class="mini-dow">${d}</div>`; });
+
+  const startDow = first.getDay();
+  for (let i=0; i<startDow; i++) html += `<div class="mini-day other"></div>`;
+
+  for (let d=1; d<=last.getDate(); d++) {
+    const ds = `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const dt = new Date(y,m,d);
+    const isToday = dt.getTime() === today.getTime();
+    const isStart = ds === formDateStart;
+    const isEnd = ds === formDateEnd;
+    const inRange = formDateStart && formDateEnd && ds > formDateStart && ds < formDateEnd;
+    let cls = 'mini-day';
+    if (isToday) cls += ' today';
+    if (isStart || isEnd) cls += ' selected';
+    if (inRange) cls += ' in-range';
+    if (isStart && formDateEnd) cls += ' range-start';
+    if (isEnd) cls += ' range-end';
+    html += `<div class="${cls}" onclick="selectFormDate('${ds}')">${d}</div>`;
+  }
+  html += `</div></div>`;
+
+  // 加入重設按鈕
+  html += `<div style="display:flex;gap:8px;margin-top:8px">
+    <div style="font-size:11px;color:var(--text2);flex:1;align-self:center">
+      ${formDateStep===0?'點選開始日期':'點選結束日期（可跳過）'}
+    </div>
+    <button onclick="resetFormDates()" style="font-size:11px;color:var(--red);background:none;border:none;cursor:pointer">重設</button>
+  </div>`;
+
+  wrap.innerHTML = html;
+}
+
+function formCalNav(dir) {
+  formCalMonth = new Date(formCalMonth.getFullYear(), formCalMonth.getMonth()+dir, 1);
+  renderFormCal();
+}
+
+function selectFormDate(ds) {
+  if (formDateStep === 0) {
+    formDateStart = ds;
+    formDateEnd = '';
+    formDateStep = 1;
+  } else {
+    if (ds < formDateStart) {
+      formDateEnd = formDateStart;
+      formDateStart = ds;
+    } else if (ds === formDateStart) {
+      formDateStep = 0;
+      formDateStart = '';
+      formDateEnd = '';
+    } else {
+      formDateEnd = ds;
+      formDateStep = 0;
+    }
+  }
+  document.getElementById('f-date').value = formDateStart;
+  document.getElementById('f-end-date').value = formDateEnd;
+  updateFormDateDisplay();
+  renderFormCal();
+}
+
+function resetFormDates() {
+  formDateStart = ''; formDateEnd = ''; formDateStep = 0;
+  document.getElementById('f-date').value = '';
+  document.getElementById('f-end-date').value = '';
+  document.getElementById('form-date-display').textContent = '';
+  renderFormCal();
+}
+
+function updateFormDateDisplay() {
+  const disp = document.getElementById('form-date-display');
+  if (!disp) return;
+  if (formDateStart && formDateEnd) {
+    disp.textContent = `${formatDateDisplay(formDateStart)} → ${formatDateDisplay(formDateEnd)}`;
+  } else if (formDateStart) {
+    disp.textContent = `${formatDateDisplay(formDateStart)}（單日）`;
+  } else {
+    disp.textContent = '';
+  }
+}
+
 function formatDateDisplay(dateStr) {
   if (!dateStr) return '';
   const [y,m,d] = dateStr.split('-').map(Number);
@@ -1163,15 +1303,14 @@ function analyzeQuick() {
   let date='', startTime='', endTime='', location='';
 
   if (text) {
-    // 解析日期：支援 M/D、MM/DD、YYYY/MM/DD、中文月日
-
+    parseTextInfo(text, function(d, st, et, loc) {
+      date = d; startTime = st; endTime = et; location = loc;
+    });
   }
 
-  // 填入表單
   closeSheet('quick-overlay');
   openAdd();
 
-  // 等表單開啟後填值
   setTimeout(() => {
     document.getElementById('f-cat').value = qSelected.category || '課程';
     toggleCourseFields();
@@ -1180,8 +1319,11 @@ function analyzeQuick() {
     setComboValue('f-type','f-type-select', qSelected.type);
     toggleUnitField();
     if (date) {
+      formDateStart = date; formDateEnd = '';
       document.getElementById('f-date').value = date;
-      document.getElementById('f-date-display').textContent = formatDateDisplay(date);
+      document.getElementById('f-end-date').value = '';
+      updateFormDateDisplay();
+      renderFormCal();
     }
     if (startTime) document.getElementById('f-start').value = startTime;
     if (endTime) document.getElementById('f-end').value = endTime;
@@ -1437,6 +1579,7 @@ function openAddProject() {
   document.getElementById('f-location').value = '';
   document.getElementById('f-note').value = '';
   document.getElementById('f-title').value = '';
+  if(document.getElementById('f-train-name')) document.getElementById('f-train-name').value = '';
   document.getElementById('form-error').style.display = 'none';
   document.getElementById('form-overlay').classList.add('open');
 }
