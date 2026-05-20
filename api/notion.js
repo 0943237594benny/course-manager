@@ -81,6 +81,7 @@ function mapPage(p) {
     endTime: props["結束時間"]?.rich_text?.[0]?.plain_text || "",
     location: props["地點"]?.rich_text?.[0]?.plain_text || "",
     note: props["備注"]?.rich_text?.[0]?.plain_text || "",
+    trainName: props["課程內容"]?.rich_text?.[0]?.plain_text || "",
   };
 }
 
@@ -101,5 +102,6 @@ function buildProps(b) {
   if (b.unit) props["單位"] = { select: { name: b.unit } };
   if (b.type) props["課程類型"] = { select: { name: b.type } };
   if (b.category) props["類別"] = { select: { name: b.category } };
+  if (b.trainName) props["課程內容"] = { rich_text: [{ text: { content: b.trainName } }] };
   return props;
 }
